@@ -1,0 +1,1 @@
+ALTER TABLE "approval_inbox" ADD COLUMN "route" jsonb DEFAULT '[]'::jsonb NOT NULL;

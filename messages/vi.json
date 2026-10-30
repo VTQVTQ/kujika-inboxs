@@ -1,0 +1,116 @@
+{
+  "meta": {
+    "appTitle": "Việc cần xử lý",
+    "appDescription": "Tổng hợp các đề nghị đang chờ bạn xác nhận, phê duyệt ở mọi hệ thống."
+  },
+  "common": {
+    "view": "Xem",
+    "close": "Đóng",
+    "openOriginal": "Mở ở hệ thống gốc",
+    "language": "Ngôn ngữ",
+    "devUser": "Tài khoản thử",
+    "devUserApply": "Đổi",
+    "dblHint": "Nhấp đúp để xem chi tiết",
+    "loading": "Đang tải…"
+  },
+  "roles": {
+    "CONFIRM": "Xác nhận",
+    "DECIDE": "Phê duyệt"
+  },
+  "priority": {
+    "LOW": "Thấp",
+    "MEDIUM": "Trung bình",
+    "HIGH": "Cao"
+  },
+  "inbox": {
+    "subtitle": "Tổng hợp các đề nghị ở mọi hệ thống đang chờ bạn xác nhận, phê duyệt.",
+    "tabsLabel": "Nhóm việc",
+    "tabs": {
+      "todo": "Chờ tôi xử lý",
+      "done": "Tôi đã xử lý"
+    },
+    "status": {
+      "PENDING": "Đang chờ bạn",
+      "DONE": "Đã xử lý",
+      "RETURNED": "Đã trả lại",
+      "CANCELLED": "Đã hủy",
+      "WAITING": "Chưa tới lượt"
+    },
+    "filter": {
+      "systemLabel": "Lọc theo hệ thống",
+      "allSystems": "Tất cả hệ thống"
+    },
+    "search": {
+      "label": "Tìm việc",
+      "placeholder": "Mã đề nghị, nội dung, người đề nghị"
+    },
+    "table": {
+      "colCode": "Hệ thống / Mã đề nghị",
+      "colContent": "Nội dung",
+      "colPriority": "Ưu tiên",
+      "colRequester": "Người đề nghị",
+      "colSubmitted": "Ngày gửi",
+      "colTask": "Việc của bạn",
+      "colActions": "Thao tác",
+      "lineSummary": "{lines} sản phẩm · Tổng SL: {qty}"
+    },
+    "pager": {
+      "label": "Phân trang",
+      "range": "{from}–{to} / {total}",
+      "perPage": "Số dòng / trang",
+      "prev": "Trang trước",
+      "next": "Trang sau",
+      "page": "Trang {page} / {pages}"
+    },
+    "view": {
+      "title": "Chi tiết việc {code}",
+      "system": "Hệ thống",
+      "code": "Mã đề nghị",
+      "summary": "Tổng hợp",
+      "status": "Trạng thái",
+      "routeTitle": "Tuyến phê duyệt",
+      "routeLoading": "Đang tải tuyến phê duyệt…",
+      "routeEmpty": "Không có thông tin tuyến phê duyệt",
+      "you": "Bạn"
+    },
+    "empty": {
+      "none": "Chưa có việc nào",
+      "noneFiltered": "Không có kết quả phù hợp",
+      "hint": "Thử đổi tab, hệ thống hoặc từ khóa tìm kiếm."
+    },
+    "error": {
+      "title": "Không tải được danh sách việc",
+      "retry": "Thử lại"
+    },
+    "act": {
+      "returnBtn": "Trả lại",
+      "dialogTitle": "{action} {code}",
+      "commentOptional": "Ý kiến (không bắt buộc)",
+      "reasonLabel": "Lý do trả lại (bắt buộc)",
+      "processing": "Đang xử lý…",
+      "invalid": "Dữ liệu không hợp lệ",
+      "reasonRequired": "Hãy nhập lý do trả lại",
+      "notActionable": "Việc này không còn chờ bạn xử lý (đã được xử lý hoặc thu hồi). Danh sách đã được cập nhật.",
+      "unreachable": "Không kết nối được hệ thống gốc. Hãy thử lại sau hoặc mở ở hệ thống gốc để xử lý.",
+      "failed": "Hệ thống gốc không thực hiện được thao tác này",
+      "done": "Đã xử lý"
+    },
+    "bulk": {
+      "label": "Thao tác hàng loạt",
+      "selectAll": "Chọn tất cả việc xử lý được trên trang",
+      "selectRow": "Chọn {code}",
+      "selected": "Đã chọn {count} việc",
+      "clear": "Bỏ chọn",
+      "approveAll": "Xác nhận / Phê duyệt",
+      "returnAll": "Trả lại",
+      "dialogTitle": "{action} {count} việc",
+      "progress": "Đang xử lý {done} / {total}…",
+      "someFailed": "{count} việc chưa xử lý được:",
+      "retry": "Thử lại việc lỗi"
+    }
+  },
+  "denied": {
+    "title": "Không có quyền truy cập",
+    "message": "Không xác định được tài khoản của bạn. Hãy đăng nhập bằng tài khoản domain của công ty rồi thử lại."
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "kujiraa-inbox",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "node server.js",
+    "dev:test": "node scripts/test-login.mjs dev",
+    "start:test": "node scripts/test-login.mjs start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "db:create": "node scripts/create-db.mjs",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "drizzle-orm": "^0.45.3",
+    "express": "^5.2.1",
+    "next": "15.5.4",
+    "next-intl": "4.4.0",
+    "node-expose-sspi": "^0.1.60",
+    "pg": "^8.23.1",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "server-only": "^0.0.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "3.3.7",
+    "@types/node": "^22",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.11",
+    "eslint": "9.39.5",
+    "eslint-config-next": "15.5.4",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  }
+}
