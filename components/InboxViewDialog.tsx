@@ -49,7 +49,7 @@ export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow
   return (
     <dialog
       ref={ref}
-      className="modal modal-wide"
+      className="modal modal-wide modal-light"
       aria-labelledby="inbox-view-title"
       onClose={onClose}
       // Bấm ra ngoài hộp thoại (vào phần nền) để đóng

@@ -1,5 +1,7 @@
 /* ========== Design tokens (cùng bảng màu với hệ thống kho) ========== */
-:root {
+/* .modal-light: hộp thoại xem việc (tờ đơn giấy) luôn dùng bảng màu sáng kể cả khi hệ thống ở chế độ tối */
+:root,
+.modal-light {
   color-scheme: light;
   --bg: #f6f7f9;
   --surface: #ffffff;
