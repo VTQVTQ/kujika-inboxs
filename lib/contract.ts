@@ -19,6 +19,9 @@ export const SOURCE_ID_MAX = 100;
 export const ITEMS_PER_SOURCE_MAX = 50;
 
 /** Whitelist khóa của summary: chỉ thêm khóa ở đây khi thật sự cần hiển thị; không đưa dữ liệu nhạy cảm (như tồn kho) vào */
+/** Số dòng hàng tối đa của một đề nghị */
+export const LINES_PER_SOURCE_MAX = 200;
+
 const summarySchema = z
   .object({
     lineCount: z.number().int().nonnegative().optional(),
@@ -60,6 +63,15 @@ export const routeStepSchema = z
   })
   .strict();
 
+/** Một dòng hàng của đề nghị — chỉ để hiển thị trong hộp thoại chi tiết */
+export const lineSchema = z
+  .object({
+    name: z.string().trim().min(1).max(300),
+    qty: z.number().int().nonnegative(),
+    reason: z.string().trim().max(500).nullable(),
+  })
+  .strict();
+
 /** Thân yêu cầu PUT: toàn bộ việc hiện tại của một đề nghị. sourceVersion = mốc thời gian của trạng thái ở hệ thống nguồn (mặc định: lúc nhận) */
 export const replaceSourceSchema = z
   .object({
@@ -67,6 +79,8 @@ export const replaceSourceSchema = z
     items: z.array(inboxItemSchema).max(ITEMS_PER_SOURCE_MAX),
     /** Tuyến phê duyệt đầy đủ (mọi bước). Bỏ qua = giữ tuyến đã lưu */
     route: z.array(routeStepSchema).max(ITEMS_PER_SOURCE_MAX).optional(),
+    /** Các dòng hàng của đề nghị. Bỏ qua = giữ các dòng đã lưu */
+    lines: z.array(lineSchema).max(LINES_PER_SOURCE_MAX).optional(),
   })
   .strict();
 

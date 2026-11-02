@@ -1,0 +1,1 @@
+ALTER TABLE "approval_inbox" ADD COLUMN "lines" jsonb DEFAULT '[]'::jsonb NOT NULL;

@@ -68,10 +68,15 @@
       "code": "Mã đề nghị",
       "summary": "Tổng hợp",
       "status": "Trạng thái",
-      "routeTitle": "Tuyến phê duyệt",
-      "routeLoading": "Đang tải tuyến phê duyệt…",
-      "routeEmpty": "Không có thông tin tuyến phê duyệt",
-      "you": "Bạn"
+      "loading": "Đang tải…",
+      "paper": {
+        "applicant": "Người đề nghị",
+        "introOut": "Đề nghị xuất kho các vật phẩm sau.",
+        "introIn": "Đề nghị mua / nhập kho các vật phẩm sau.",
+        "colName": "Tên hàng",
+        "colQty": "Số lượng",
+        "colReason": "Lý do đề nghị"
+      }
     },
     "empty": {
       "none": "Chưa có việc nào",

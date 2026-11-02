@@ -68,10 +68,15 @@
       "code": "申請番号",
       "summary": "概要",
       "status": "状態",
-      "routeTitle": "承認ルート",
-      "routeLoading": "承認ルートを読み込み中…",
-      "routeEmpty": "承認ルートの情報がありません",
-      "you": "あなた"
+      "loading": "読み込み中…",
+      "paper": {
+        "applicant": "申請者",
+        "introOut": "下記物品の出庫を申請いたします。",
+        "introIn": "下記物品の購入を申請いたします。",
+        "colName": "品名",
+        "colQty": "数量",
+        "colReason": "申請理由"
+      }
     },
     "empty": {
       "none": "処理待ちの申請はありません",

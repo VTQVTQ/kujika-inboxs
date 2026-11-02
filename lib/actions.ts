@@ -9,7 +9,7 @@ import { callSourceAct } from "@/lib/act";
 import { recordAudit } from "@/lib/audit";
 import { getCurrentUser } from "@/lib/auth";
 import { getAuthProvider, USER_COOKIE } from "@/lib/auth-identity";
-import { findActionableItem, listRoute, type RouteStep } from "@/lib/store";
+import { findActionableItem, getInboxDetail, type InboxDetail } from "@/lib/store";
 
 /** Tài khoản AD: chữ, số, ".", "_", "-" */
 const ACCOUNT_PATTERN = /^[a-z0-9._-]{1,100}$/;
@@ -74,9 +74,9 @@ export async function actOnItemAction(id: number, action: "approve" | "return", 
   return { ok: false, error: outcome.message || t("failed") };
 }
 
-/** Tuyến phê duyệt của đề nghị chứa việc này (để hiện trong hộp thoại xem) */
-export async function getRouteAction(id: number): Promise<RouteStep[]> {
-  if (!Number.isInteger(id) || id <= 0) return [];
+/** Tuyến phê duyệt + các dòng hàng của đề nghị chứa việc này (để hiện trong hộp thoại xem) */
+export async function getDetailAction(id: number): Promise<InboxDetail> {
+  if (!Number.isInteger(id) || id <= 0) return { route: [], lines: [] };
   const user = await getCurrentUser();
-  return listRoute(user.account, id);
+  return getInboxDetail(user.account, id);
 }

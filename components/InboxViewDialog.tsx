@@ -3,9 +3,9 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { isLocale } from "@/i18n/config";
-import { getRouteAction } from "@/lib/actions";
-import { fmtDateTime, fmtNum } from "@/lib/format";
-import type { InboxRow, RouteStep } from "@/lib/store";
+import { getDetailAction } from "@/lib/actions";
+import { fmtDateTime, fmtNum, fmtStampDate } from "@/lib/format";
+import type { InboxDetail, InboxRow, RouteStep } from "@/lib/store";
 
 /**
  * Xem một việc. Chỉ dùng các trường chung của hộp việc (không có phần riêng của từng hệ thống)
@@ -17,7 +17,7 @@ export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow
   const locale = isLocale(localeRaw) ? localeRaw : "vi";
   const ref = useRef<HTMLDialogElement>(null);
 
-  const [route, setRoute] = useState<RouteStep[] | null>(null);
+  const [detail, setDetail] = useState<InboxDetail | null>(null);
 
   useEffect(() => {
     const dialog = ref.current;
@@ -26,7 +26,7 @@ export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow
 
   useEffect(() => {
     let alive = true;
-    getRouteAction(row.id).then((r) => alive && setRoute(r), () => alive && setRoute([]));
+    getDetailAction(row.id).then((r) => alive && setDetail(r), () => alive && setDetail({ route: [], lines: [] }));
     return () => {
       alive = false;
     };
@@ -39,10 +39,17 @@ export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow
     </a>
   );
 
+  // Chưa có dòng hàng từ hệ thống nguồn: hiện một dòng tóm tắt từ tiêu đề
+  const lines = detail === null ? null : detail.lines.length > 0 ? detail.lines : [{ name: row.title, qty: row.totalQty ?? 0, reason: null }];
+  const route = detail?.route ?? [];
+  // Thứ tự cột ký như biểu mẫu giấy: 承認 (phê duyệt) rồi 確認 (xác nhận)
+  const stampRoles = (["DECIDE", "CONFIRM"] as const).filter((r) => route.length === 0 || route.some((s) => s.role === r));
+  const intro = row.type === "IN" ? "introIn" : "introOut";
+
   return (
     <dialog
       ref={ref}
-      className="modal"
+      className="modal modal-wide"
       aria-labelledby="inbox-view-title"
       onClose={onClose}
       // Bấm ra ngoài hộp thoại (vào phần nền) để đóng
@@ -52,46 +59,58 @@ export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow
     >
       <div className="modal-head">
         <h2 id="inbox-view-title">{t("inbox.view.title", { code: row.code })}</h2>
-        <p className="muted">{row.systemName[locale]}</p>
+        <p className="muted">
+          {row.systemName[locale]} · <span className={`pill pill-${row.priority.toLowerCase()}`}>{t(`priority.${row.priority}`)}</span> · {t(`inbox.status.${row.status}`)}
+          {row.actedAt && ` · ${fmtDateTime(row.actedAt, locale)}`} · {t("inbox.table.colSubmitted")}: {fmtDateTime(row.submittedAt, locale)}
+        </p>
       </div>
-      <dl className="info-grid">
-        <div><dt>{t("inbox.view.system")}</dt><dd>{row.systemName[locale]}</dd></div>
-        <div><dt>{t("inbox.view.code")}</dt><dd className="mono">{row.code}</dd></div>
-        <div className="span"><dt>{t("inbox.table.colContent")}</dt><dd>{row.title}</dd></div>
-        {row.lineCount !== null && row.totalQty !== null && (
-          <div className="span"><dt>{t("inbox.view.summary")}</dt><dd>{t("inbox.table.lineSummary", { lines: fmtNum(row.lineCount, locale), qty: fmtNum(row.totalQty, locale) })}</dd></div>
-        )}
-        <div><dt>{t("inbox.table.colRequester")}</dt><dd>{row.requesterName}</dd></div>
-        <div><dt>{t("inbox.table.colPriority")}</dt><dd><span className={`pill pill-${row.priority.toLowerCase()}`}>{t(`priority.${row.priority}`)}</span></dd></div>
-        <div><dt>{t("inbox.table.colSubmitted")}</dt><dd>{fmtDateTime(row.submittedAt, locale)}</dd></div>
-        <div><dt>{t("inbox.table.colTask")}</dt><dd>{t(`roles.${row.role}`)}</dd></div>
-        <div>
-          <dt>{t("inbox.view.status")}</dt>
-          <dd>{t(`inbox.status.${row.status}`)}{row.actedAt && ` · ${fmtDateTime(row.actedAt, locale)}`}</dd>
-        </div>
-      </dl>
-      <h3 className="route-title">{t("inbox.view.routeTitle")}</h3>
-      {route === null ? (
-        <p className="muted route-title" role="status">{t("inbox.view.routeLoading")}</p>
-      ) : route.length === 0 ? (
-        <p className="muted route-title">{t("inbox.view.routeEmpty")}</p>
-      ) : (
-        <ol className="route">
-          {route.map((s) => (
-            <li key={s.stepNo} data-status={s.status}>
-              <span className="route-no">{s.stepNo}</span>
-              <div>
-                <div className={s.isMine ? "strong" : undefined}>{s.assigneeName ?? s.assignee}{s.isMine && ` (${t("inbox.view.you")})`}</div>
-                <div className="muted small">{t(`roles.${s.role}`)}{s.assigneeName && ` · ${s.assignee}`}</div>
-              </div>
-              <div className="right small">
-                <div>{t(`inbox.status.${s.status}`)}</div>
-                {s.actedAt && <div className="muted">{fmtDateTime(s.actedAt, locale)}</div>}
-              </div>
-            </li>
-          ))}
-        </ol>
-      )}
+
+      <div className="paper">
+        <p className="paper-applicant">
+          <span>{t("inbox.view.paper.applicant")} <span aria-hidden="true" className="paper-arrow" /></span>
+          <span className="paper-name">{row.requesterName}</span>
+        </p>
+        <p className="paper-intro">{t(`inbox.view.paper.${intro}`)}</p>
+
+        <table className="paper-table">
+          <thead>
+            <tr>
+              <th scope="col">{t("inbox.view.paper.colName")}</th>
+              <th scope="col" className="paper-qty">{t("inbox.view.paper.colQty")}</th>
+              <th scope="col">{t("inbox.view.paper.colReason")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {lines === null ? (
+              <tr><td colSpan={3} className="muted" role="status">{t("inbox.view.loading")}</td></tr>
+            ) : (
+              lines.map((l, i) => (
+                <tr key={i}>
+                  <td>{l.name}</td>
+                  <td className="paper-qty">{fmtNum(l.qty, locale)}</td>
+                  <td>{l.reason}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+
+        <table className="paper-stamps">
+          <thead>
+            <tr>{stampRoles.map((r) => <th key={r} scope="col">{t(`roles.${r}`)}</th>)}</tr>
+          </thead>
+          <tbody>
+            <tr>
+              {stampRoles.map((r) => (
+                <td key={r}>
+                  {route.filter((s) => s.role === r).map((s) => <Stamp key={s.stepNo} step={s} />)}
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <div className="modal-foot">
         <button type="button" className="btn" onClick={() => ref.current?.close()}>{t("common.close")}</button>
         {openLink}
@@ -103,5 +122,16 @@ export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow
         )}
       </div>
     </dialog>
+  );
+}
+
+/** Một bước trong ô ký: chỉ người đã xử lý (xong / trả lại) mới có tên + ngày; người chưa xử lý để trống như đơn giấy chưa ký */
+function Stamp({ step }: { step: RouteStep }) {
+  if (step.status !== "DONE" && step.status !== "RETURNED") return null;
+  return (
+    <div className="stamp" data-status={step.status}>
+      <div>{step.assigneeName ?? step.assignee}</div>
+      <div>{fmtStampDate(step.actedAt)}</div>
+    </div>
   );
 }

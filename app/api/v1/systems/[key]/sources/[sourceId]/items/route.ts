@@ -24,7 +24,7 @@ export const PUT = route("source.replace", async (req, { params }: Ctx) => {
   const system = await getSystemOrThrow(key);
   if (!system.isActive) return json({ error: { code: "system_inactive", message: "Hệ thống đang tạm ngưng" } }, 403);
   const body = await readJson(req, replaceSourceSchema);
-  const result = await replaceForSource(key, parseSourceId(sourceId), body.items, body.sourceVersion, body.route);
+  const result = await replaceForSource(key, parseSourceId(sourceId), body.items, body.sourceVersion, { route: body.route, lines: body.lines });
   auditDetail({ items: body.items.length, changed: result.changed, stale: result.stale });
   return json(result);
 });

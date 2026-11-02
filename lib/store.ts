@@ -1,6 +1,6 @@
 import "server-only";
 import { and, asc, count, desc, eq, ilike, inArray, ne, or, type SQL, sql } from "drizzle-orm";
-import { approvalInbox, inboxSystems, type ApprovalInboxRow, type InboxRouteStep, type InboxStatus, type RequestPriority, type StepRole } from "@/db/schema";
+import { approvalInbox, inboxSystems, type ApprovalInboxRow, type InboxLine, type InboxRouteStep, type InboxStatus, type RequestPriority, type StepRole } from "@/db/schema";
 import { ApiError } from "@/lib/api-error";
 import type { InboxItem, patchItemSchema } from "@/lib/contract";
 import { db } from "@/lib/db";
@@ -15,9 +15,10 @@ import type { z } from "zod";
 const sameTime = (a: Date | null, b: Date | null) => a?.getTime() === b?.getTime();
 
 /** Dòng đã lưu đã giống hệt việc mong muốn (không cần ghi lại). summary so từng khóa vì jsonb không giữ thứ tự khóa */
-function sameItem(stored: ApprovalInboxRow, item: InboxItem, route: InboxRouteStep[]) {
+function sameItem(stored: ApprovalInboxRow, item: InboxItem, extras: { route: InboxRouteStep[]; lines: InboxLine[] }) {
   return (
-    JSON.stringify(stored.route) === JSON.stringify(route) &&
+    JSON.stringify(stored.route) === JSON.stringify(extras.route) &&
+    JSON.stringify(stored.lines) === JSON.stringify(extras.lines) &&
     stored.sourceType === item.sourceType &&
     stored.role === item.role &&
     stored.assigneeAccount === item.assigneeAccount &&
@@ -41,7 +42,7 @@ const fromExcluded = (column: string) => sql.raw(`excluded."${column}"`);
  * desired đã được kiểm tra bằng inboxItemSchema ở nơi nhận (API). Khóa tư vấn theo (hệ thống, đề nghị) để hai lần gửi cùng một đề nghị không chạy chồng.
  * Bản gửi cũ hơn dữ liệu đã lưu (version nhỏ hơn) bị bỏ qua (stale). items rỗng = xóa mọi việc của đề nghị.
  */
-export async function replaceForSource(system: string, sourceId: string, desired: InboxItem[], version = new Date(), route?: InboxRouteStep[]) {
+export async function replaceForSource(system: string, sourceId: string, desired: InboxItem[], version = new Date(), extras: { route?: InboxRouteStep[]; lines?: InboxLine[] } = {}) {
   if (new Set(desired.map((i) => i.stepNo)).size !== desired.length) {
     throw new ApiError(400, "duplicate_step", "stepNo bị trùng trong cùng một đề nghị");
   }
@@ -54,13 +55,13 @@ export async function replaceForSource(system: string, sourceId: string, desired
       .where(and(eq(approvalInbox.sourceSystem, system), eq(approvalInbox.sourceId, sourceId)));
     if (stored.some((s) => s.sourceVersion > version)) return { changed: false, stale: true };
 
-    // Không gửi route: giữ tuyến đã lưu
-    const effectiveRoute = route ?? stored[0]?.route ?? [];
+    // Không gửi route / lines: giữ bản đã lưu
+    const effective = { route: extras.route ?? stored[0]?.route ?? [], lines: extras.lines ?? stored[0]?.lines ?? [] };
     const byStep = new Map(stored.map((s) => [s.stepNo, s]));
     const removedIds = stored.filter((s) => !desired.some((d) => d.stepNo === s.stepNo)).map((s) => s.id);
     const changed = desired.filter((d) => {
       const s = byStep.get(d.stepNo);
-      return !s || !sameItem(s, d, effectiveRoute);
+      return !s || !sameItem(s, d, effective);
     });
     if (!removedIds.length && !changed.length) return { changed: false, stale: false };
 
@@ -68,7 +69,7 @@ export async function replaceForSource(system: string, sourceId: string, desired
     if (changed.length) {
       await tx
         .insert(approvalInbox)
-        .values(changed.map((d) => ({ ...d, route: effectiveRoute, sourceSystem: system, sourceId, sourceVersion: version })))
+        .values(changed.map((d) => ({ ...d, ...effective, sourceSystem: system, sourceId, sourceVersion: version })))
         .onConflictDoUpdate({
           target: [approvalInbox.sourceSystem, approvalInbox.sourceId, approvalInbox.stepNo],
           set: {
@@ -83,6 +84,7 @@ export async function replaceForSource(system: string, sourceId: string, desired
             deepLink: fromExcluded("deep_link"),
             summary: fromExcluded("summary"),
             route: fromExcluded("route"),
+            lines: fromExcluded("lines"),
             submittedAt: fromExcluded("submitted_at"),
             actedAt: fromExcluded("acted_at"),
             sourceVersion: fromExcluded("source_version"),
@@ -342,34 +344,36 @@ export interface RouteStep {
   /** WAITING = chưa tới lượt */
   status: InboxStatus | "WAITING";
   actedAt: string | null;
-  /** Bước của chính người đang xem */
-  isMine: boolean;
+}
+
+export interface InboxDetail {
+  route: RouteStep[];
+  lines: InboxLine[];
 }
 
 /**
- * Tuyến phê duyệt đầy đủ của đề nghị chứa việc này. Dùng tuyến đầy đủ do hệ thống nguồn gửi (có cả bước chưa tới lượt);
+ * Tuyến phê duyệt đầy đủ + các dòng hàng của đề nghị chứa việc này. Dùng tuyến đầy đủ do hệ thống nguồn gửi (có cả bước chưa tới lượt);
  * hệ thống chưa gửi thì dùng các bước đang có trong hộp việc. Chỉ trả về nếu việc là của đúng người này.
  */
-export async function listRoute(account: string, id: number): Promise<RouteStep[]> {
+export async function getInboxDetail(account: string, id: number): Promise<InboxDetail> {
   const [own] = await db
     .select({ system: approvalInbox.sourceSystem, sourceId: approvalInbox.sourceId })
     .from(approvalInbox)
     .innerJoin(inboxSystems, eq(inboxSystems.key, approvalInbox.sourceSystem))
     .where(and(eq(approvalInbox.id, id), ownedBy(account)))
     .limit(1);
-  if (!own) return [];
+  if (!own) return { route: [], lines: [] };
   const rows = await db
     .select()
     .from(approvalInbox)
     .where(and(eq(approvalInbox.sourceSystem, own.system), eq(approvalInbox.sourceId, own.sourceId)))
     .orderBy(asc(approvalInbox.stepNo));
-  const me = account.toLowerCase();
   const full: InboxRouteStep[] = rows[0]?.route.length
     ? rows[0].route
     : rows.map((r) => ({ stepNo: r.stepNo, role: r.role, assigneeAccount: r.assigneeAccount, status: r.status, actedAt: r.actedAt?.toISOString() ?? null }));
   // Trạng thái thật của các bước đã có trong hộp việc luôn mới hơn tuyến lưu kèm
   const live = new Map(rows.map((r) => [r.stepNo, r]));
-  return [...full]
+  const route = [...full]
     .sort((a, b) => a.stepNo - b.stepNo)
     .map((s) => {
       const r = live.get(s.stepNo);
@@ -380,7 +384,7 @@ export async function listRoute(account: string, id: number): Promise<RouteStep[
         assigneeName: s.assigneeName ?? null,
         status: r?.status ?? s.status,
         actedAt: r ? (r.actedAt?.toISOString() ?? null) : s.actedAt,
-        isMine: s.assigneeAccount === me,
       };
     });
+  return { route, lines: rows[0]?.lines ?? [] };
 }

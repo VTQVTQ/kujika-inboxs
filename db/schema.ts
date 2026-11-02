@@ -30,6 +30,9 @@ export type InboxRouteStep = {
   actedAt: string | null;
 };
 
+/** Một dòng hàng của đề nghị (để hiển thị đúng như biểu mẫu giấy): tên, số lượng, lý do */
+export type InboxLine = { name: string; qty: number; reason: string | null };
+
 /**
  * Hệ thống nguồn đã đăng ký (kho, ...). Chỉ hệ thống có mã (token) riêng mới ghi được việc của chính nó.
  * Đăng ký / sửa qua API quản trị /api/v1/systems; không lưu token, chỉ lưu bản băm.
@@ -97,6 +100,8 @@ export const approvalInbox = pgTable(
     summary: jsonb("summary").$type<InboxSummary>().notNull().default({}),
     /** Tuyến phê duyệt đầy đủ của đề nghị (giống nhau ở mọi bước của đề nghị); rỗng = hệ thống nguồn chưa gửi */
     route: jsonb("route").$type<InboxRouteStep[]>().notNull().default([]),
+    /** Các dòng hàng của đề nghị (giống nhau ở mọi bước của đề nghị); rỗng = hệ thống nguồn chưa gửi */
+    lines: jsonb("lines").$type<InboxLine[]>().notNull().default([]),
     /** Lúc đề nghị được gửi */
     submittedAt: tstz("submitted_at").notNull(),
     /** Lúc bước này được xử lý */
