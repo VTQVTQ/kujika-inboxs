@@ -233,7 +233,16 @@ th[aria-sort] .sort-mark { color: var(--accent); }
 .paper-table td { height: 3em; }
 .paper-table .paper-qty { text-align: right; width: 5em; white-space: nowrap; }
 .paper-stamps { margin-left: auto; min-width: 240px; }
-.paper-stamps td { height: 5em; text-align: center; vertical-align: middle; min-width: 120px; }
+.paper-stamps td { height: 6.5em; text-align: center; vertical-align: middle; min-width: 120px; }
 .stamp + .stamp { margin-top: 8px; }
-.stamp[data-status="RETURNED"], .stamp[data-status="CANCELLED"] { color: var(--high-fg); }
+.stamp { display: grid; justify-items: center; gap: 2px; }
+.stamp-name { font-size: 12px; }
+.stamp-date { font-size: 12px; }
+/* Mộc: vòng tròn kép, chữ đậm, hơi nghiêng như đóng tay */
+.seal {
+  --seal: #2e7d32; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; margin-bottom: 2px;
+  border: 2px solid var(--seal); box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px var(--seal); color: var(--seal);
+  font-size: 18px; font-weight: 700; line-height: 1; letter-spacing: 0.02em; transform: rotate(-8deg); opacity: 0.9;
+}
+.stamp[data-status="RETURNED"] .seal { --seal: #c62828; font-size: 14px; }
 .paper-arrow::before { content: "\25B8"; }

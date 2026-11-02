@@ -103,7 +103,7 @@ export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow
             <tr>
               {stampRoles.map((r) => (
                 <td key={r}>
-                  {route.filter((s) => s.role === r).map((s) => <Stamp key={s.stepNo} step={s} />)}
+                  {route.filter((s) => s.role === r).map((s) => <Stamp key={s.stepNo} step={s} sealLabel={t(`inbox.view.seal.${s.status === "DONE" ? "DONE" : "RETURNED"}`)} />)}
                 </td>
               ))}
             </tr>
@@ -125,13 +125,14 @@ export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow
   );
 }
 
-/** Một bước trong ô ký: chỉ người đã xử lý (xong / trả lại) mới có tên + ngày; người chưa xử lý để trống như đơn giấy chưa ký */
-function Stamp({ step }: { step: RouteStep }) {
+/** Một bước trong ô ký: người đã xử lý (xong / trả lại) được đóng mộc kèm tên + ngày; người chưa xử lý để trống như đơn giấy chưa ký */
+function Stamp({ step, sealLabel }: { step: RouteStep; sealLabel: string }) {
   if (step.status !== "DONE" && step.status !== "RETURNED") return null;
   return (
     <div className="stamp" data-status={step.status}>
-      <div>{step.assigneeName ?? step.assignee}</div>
-      <div>{fmtStampDate(step.actedAt)}</div>
+      <span className="seal">{sealLabel}</span>
+      <div className="stamp-name">{step.assigneeName ?? step.assignee}</div>
+      <div className="stamp-date">{fmtStampDate(step.actedAt)}</div>
     </div>
   );
 }

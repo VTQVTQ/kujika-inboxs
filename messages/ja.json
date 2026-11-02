@@ -76,6 +76,10 @@
         "colName": "品名",
         "colQty": "数量",
         "colReason": "申請理由"
+      },
+      "seal": {
+        "DONE": "済み",
+        "RETURNED": "差戻し"
       }
     },
     "empty": {

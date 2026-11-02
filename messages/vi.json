@@ -76,6 +76,10 @@
         "colName": "Tên hàng",
         "colQty": "Số lượng",
         "colReason": "Lý do đề nghị"
+      },
+      "seal": {
+        "DONE": "済み",
+        "RETURNED": "差戻し"
       }
     },
     "empty": {
