@@ -9,7 +9,8 @@ const WIDTH: Record<Shape, string[]> = {
   lines: ["85%", "50%"],
   pill: ["3.5em"],
   date: ["5.5em"],
-  button: ["4em"],
+  /* Cột Thao tác: 2 hàng nút (Xem + Mở ở hệ thống gốc / Trả lại + Xác nhận) */
+  button: ["14em", "14em"],
 };
 
 export function SkeletonRows({ columns, rows }: { columns: readonly { id: string; sk: Shape; right?: boolean }[]; rows: number }) {
@@ -27,5 +28,16 @@ export function SkeletonRows({ columns, rows }: { columns: readonly { id: string
         </tr>
       ))}
     </tbody>
+  );
+}
+
+/** Khung chờ thanh phân trang: cùng lớp .pager (cùng chiều cao với thanh thật), bên trái số dòng, bên phải nhóm nút */
+export function PagerSkeleton() {
+  return (
+    <div className="pager" aria-hidden="true">
+      <span className="sk" style={{ width: "5em" }} />
+      {/* Tối đa 60% để trên điện thoại không xuống hàng (thanh thật vẫn một hàng) */}
+      <span className="sk" style={{ width: "22em", maxWidth: "60%" }} />
+    </div>
   );
 }

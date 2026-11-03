@@ -6,11 +6,12 @@ import InboxRows from "@/components/InboxRows";
 import { InboxSelection, ResetSelection, SelectAllTh } from "@/components/InboxSelection";
 import Pager from "@/components/Pager";
 import SortTh from "@/components/SortTh";
-import { SkeletonRows } from "@/components/Skeleton";
+import { PagerSkeleton, SkeletonRows } from "@/components/Skeleton";
 import { isLocale } from "@/i18n/config";
 import { getCurrentUser } from "@/lib/auth";
 import { INBOX_SORTS, type InboxTab, listActiveSystems, listInbox } from "@/lib/store";
 import { keepTableParams, parseTableQuery } from "@/lib/table";
+import { COLUMNS, TABS } from "./columns";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("meta"))("appTitle") };
@@ -19,20 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 type SP = Promise<Record<string, string | string[] | undefined>>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
 
-const TABS: InboxTab[] = ["todo", "done"];
 const PATH = "/viec-can-xu-ly";
-
-/** Các cột của bảng — nguồn chung cho đầu bảng thật và khung chờ */
-const COLUMNS = [
-  { id: "select", sk: "check" },
-  { id: "code", label: "inbox.table.colCode", sort: "code", sk: "codeSub" },
-  { id: "content", label: "inbox.table.colContent", sk: "lines" },
-  { id: "priority", label: "inbox.table.colPriority", sort: "priority", sk: "pill" },
-  { id: "requester", label: "inbox.table.colRequester", sk: "text" },
-  { id: "submitted", label: "inbox.table.colSubmitted", sort: "submitted", sk: "date" },
-  { id: "task", label: "inbox.table.colTask", sk: "textSub" },
-  { id: "actions", label: "inbox.table.colActions", sk: "button", right: true },
-] as const;
 
 export default async function InboxPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
@@ -139,7 +127,7 @@ export default async function InboxPage({ searchParams }: { searchParams: SP }) 
             </Suspense>
           </table>
         </div>
-        <Suspense key={dataKey} fallback={null}>
+        <Suspense key={dataKey} fallback={<PagerSkeleton />}>
           <PagerData data={data} sizeHref={(size) => href({ page: "", size: size === 10 ? "" : String(size) })} pageHref={(page) => href({ page: page > 1 ? String(page) : "" })} />
         </Suspense>
       </div>
@@ -154,7 +142,8 @@ function TabLink({ id, active, href, label, count }: { id: InboxTab; active: Inb
   return (
     <Link href={href} className="tab" aria-current={active === id ? "page" : undefined} scroll={false}>
       {label}
-      {count !== undefined && <span className="tab-count">{count}</span>}
+      {/* Chưa có số (đang chờ dữ liệu): khối chờ cùng cỡ để tab không đổi bề ngang */}
+      {count !== undefined ? <span className="tab-count">{count}</span> : <span className="sk sk-count" aria-hidden="true" />}
     </Link>
   );
 }
