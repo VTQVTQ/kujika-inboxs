@@ -2,6 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { isLocale } from "@/i18n/config";
 import { fmtDate, fmtNum } from "@/lib/format";
 import type { InboxRow } from "@/lib/store";
@@ -65,17 +66,20 @@ export default function InboxRows({ rows }: { rows: InboxRow[] }) {
           </tr>
         ))}
       </tbody>
-      {viewing && (
-        <InboxViewDialog
-          row={viewing}
-          onClose={() => setViewing(null)}
-          onAct={(action) => {
-            setViewing(null);
-            setActing({ row: viewing, action });
-          }}
-        />
-      )}
-      {acting && <ActDialog row={acting.row} action={acting.action} onClose={() => setActing(null)} />}
+      {/* Hộp thoại đưa ra document.body: <dialog> không được nằm trong <table> (lỗi hydration). Chỉ render sau khi bấm nên không có ở bản render server */}
+      {viewing &&
+        createPortal(
+          <InboxViewDialog
+            row={viewing}
+            onClose={() => setViewing(null)}
+            onAct={(action) => {
+              setViewing(null);
+              setActing({ row: viewing, action });
+            }}
+          />,
+          document.body,
+        )}
+      {acting && createPortal(<ActDialog row={acting.row} action={acting.action} onClose={() => setActing(null)} />, document.body)}
     </>
   );
 }
