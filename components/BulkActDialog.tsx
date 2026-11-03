@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { useToast } from "@/components/Toast";
 import { actOnItemAction } from "@/lib/actions";
 import type { InboxRow } from "@/lib/store";
 
@@ -25,6 +26,7 @@ export default function BulkActDialog({ rows, action, onClose, onDone }: { rows:
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [failures, setFailures] = useState<Failure[] | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     const dialog = ref.current;
@@ -51,11 +53,16 @@ export default function BulkActDialog({ rows, action, onClose, onDone }: { rows:
     }
     setRunning(false);
     router.refresh();
+    const done = items.length - failed.length;
     if (failed.length === 0) {
+      toast({ kind: "ok", text: t("inbox.bulk.toastDone", { count: done }) });
       onDone();
       ref.current?.close();
       return;
     }
+    toast(done > 0
+      ? { kind: "warn", text: t("inbox.bulk.toastPartial", { done, count: failed.length }) }
+      : { kind: "error", text: t("inbox.bulk.toastFailed", { count: failed.length }) });
     // Giữ lại các việc lỗi để thử lại; việc đã xong thì bỏ khỏi danh sách
     const failedIds = new Set(failed.map((f) => f.row.id));
     setItems((prev) => prev.filter((r) => failedIds.has(r.id)));

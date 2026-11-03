@@ -11,7 +11,8 @@
     "devUser": "Tài khoản thử",
     "devUserApply": "Đổi",
     "dblHint": "Nhấp đúp để xem chi tiết",
-    "loading": "Đang tải…"
+    "loading": "Đang tải…",
+    "closeToast": "Đóng thông báo"
   },
   "roles": {
     "CONFIRM": "Xác nhận",
@@ -102,7 +103,10 @@
       "notActionable": "Việc này không còn chờ bạn xử lý (đã được xử lý hoặc thu hồi). Danh sách đã được cập nhật.",
       "unreachable": "Không kết nối được hệ thống gốc. Hãy thử lại sau hoặc mở ở hệ thống gốc để xử lý.",
       "failed": "Hệ thống gốc không thực hiện được thao tác này",
-      "done": "Đã xử lý"
+      "done": "Đã xử lý",
+      "toastCONFIRM": "Đã xác nhận {code}",
+      "toastDECIDE": "Đã phê duyệt {code}",
+      "toastReturned": "Đã trả lại {code}"
     },
     "bulk": {
       "label": "Thao tác hàng loạt",
@@ -115,7 +119,10 @@
       "dialogTitle": "{action} {count} việc",
       "progress": "Đang xử lý {done} / {total}…",
       "someFailed": "{count} việc chưa xử lý được:",
-      "retry": "Thử lại việc lỗi"
+      "retry": "Thử lại việc lỗi",
+      "toastDone": "Đã xử lý {count} việc",
+      "toastPartial": "Đã xử lý {done} việc, còn {count} việc chưa xử lý được",
+      "toastFailed": "Không xử lý được {count} việc"
     }
   },
   "denied": {

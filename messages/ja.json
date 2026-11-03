@@ -11,7 +11,8 @@
     "devUser": "テストアカウント",
     "devUserApply": "切替",
     "dblHint": "ダブルクリックで詳細を表示",
-    "loading": "読み込み中…"
+    "loading": "読み込み中…",
+    "closeToast": "通知を閉じる"
   },
   "roles": {
     "CONFIRM": "確認",
@@ -102,7 +103,10 @@
       "notActionable": "この申請は処理待ちではなくなりました（処理済みまたは取り下げ）。一覧を更新しました。",
       "unreachable": "元のシステムに接続できません。しばらくしてからやり直すか、元のシステムで処理してください。",
       "failed": "元のシステムで処理できませんでした",
-      "done": "処理しました"
+      "done": "処理しました",
+      "toastCONFIRM": "{code} を確認しました",
+      "toastDECIDE": "{code} を承認しました",
+      "toastReturned": "{code} を差し戻しました"
     },
     "bulk": {
       "label": "一括操作",
@@ -115,7 +119,10 @@
       "dialogTitle": "{action}（{count} 件）",
       "progress": "処理中 {done} / {total}…",
       "someFailed": "{count} 件を処理できませんでした：",
-      "retry": "失敗した申請を再試行"
+      "retry": "失敗した申請を再試行",
+      "toastDone": "{count} 件を処理しました",
+      "toastPartial": "{done} 件を処理しました。{count} 件は処理できませんでした",
+      "toastFailed": "{count} 件を処理できませんでした"
     }
   },
   "denied": {

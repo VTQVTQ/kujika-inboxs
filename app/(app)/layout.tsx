@@ -1,6 +1,7 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import DevUserSwitcher from "@/components/DevUserSwitcher";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
+import { ToastProvider } from "@/components/Toast";
 import { isLocale } from "@/i18n/config";
 import { getCurrentUser } from "@/lib/auth";
 import { getAuthProvider } from "@/lib/auth-identity";
@@ -19,7 +20,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <span className="user-chip">{user.display}</span>
         </div>
       </header>
-      <main className="content">{children}</main>
+      <ToastProvider>
+        <main className="content">{children}</main>
+      </ToastProvider>
     </div>
   );
 }

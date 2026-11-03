@@ -23,6 +23,7 @@
   --mid-fg: #7a5300;
   --high-bg: #fbe7e7;
   --high-fg: #a12626;
+  --ok-fg: #2e7d32;
   --skeleton-base: #eceef2;
   --skeleton-shine: rgba(255, 255, 255, 0.85);
   --shadow-pop: 0 16px 40px rgba(17, 20, 24, 0.18);
@@ -52,6 +53,7 @@
     --mid-fg: #f0c766;
     --high-bg: #3d1f1f;
     --high-fg: #f19999;
+    --ok-fg: #6fc276;
     --skeleton-base: #232831;
     --skeleton-shine: rgba(255, 255, 255, 0.07);
     --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.5);
@@ -208,6 +210,47 @@ th[aria-sort] .sort-mark { color: var(--accent); }
 .info-grid .span { grid-column: 1 / -1; }
 .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 24px 20px; }
 
+/* ---------- Thông báo nhanh ---------- */
+/* Thẻ trắng, viền trái 4px theo loại: xanh lá = thành công, vàng cam = một phần chưa xong, đỏ = lỗi */
+.toasts {
+  position: fixed; inset: auto 24px calc(24px + env(safe-area-inset-bottom, 0px)) auto; margin: 0; padding: 0; border: 0;
+  background: transparent; overflow: visible; display: flex; flex-direction: column; gap: 8px; max-width: min(560px, calc(100vw - 48px));
+}
+.toasts:not(:popover-open) { display: none; }
+.toast {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; position: relative; overflow: hidden;
+  padding: 8px 8px 8px 16px; border-radius: 10px; border: 1px solid var(--border); border-left: 4px solid var(--ok-fg);
+  background: var(--surface); color: var(--text); box-shadow: var(--shadow-pop); font-size: 14px;
+  animation: toast-in 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.toast.is-warn { border-left-color: var(--mid-fg); background: var(--mid-bg); border-color: var(--mid-fg); }
+.toast.is-error { border-left-color: var(--high-fg); }
+/* Thanh thời gian ở mép dưới: co dần tới lúc toast tự đóng (--toast-life do Toast.tsx đặt) */
+.toast::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ok-fg); opacity: 0.45;
+  transform-origin: left; animation: toast-life var(--toast-life, 4500ms) linear forwards;
+}
+.toast.is-warn::after { background: var(--mid-fg); }
+.toast.is-error::after { background: var(--high-fg); }
+.toast.is-leaving { animation: toast-out 0.18s ease-in forwards; }
+.toast-text { display: inline-flex; align-items: center; gap: 10px; }
+.toast-badge {
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--ok-fg); color: var(--surface); font-size: 12px; font-weight: 700;
+  animation: toast-badge-pop 0.35s cubic-bezier(0.3, 1.6, 0.5, 1) 0.15s both;
+}
+.toast.is-warn .toast-badge { background: var(--mid-fg); color: var(--mid-bg); }
+.toast.is-error .toast-badge { background: var(--high-fg); }
+.toast-close {
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 0;
+  border-radius: 8px; background: transparent; color: var(--text-muted); cursor: pointer;
+}
+.toast-close:hover { background: var(--low-bg); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes toast-out { to { opacity: 0; transform: translateY(6px); } }
+@keyframes toast-life { to { transform: scaleX(0); } }
+@keyframes toast-badge-pop { from { opacity: 0; transform: scale(0); } }
+
 .denied { max-width: 520px; margin: 15vh auto; padding: 0 16px; display: grid; gap: 8px; }
 
 @media (max-width: 640px) {
@@ -219,6 +262,8 @@ th[aria-sort] .sort-mark { color: var(--accent); }
 
 @media (prefers-reduced-motion: reduce) {
   .sk::after { animation: none; }
+  .toast, .toast.is-leaving, .toast-badge { animation: none; }
+  .toast::after { display: none; }
 }
 
 

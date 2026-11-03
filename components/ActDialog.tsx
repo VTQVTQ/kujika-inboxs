@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { useToast } from "@/components/Toast";
 import { isLocale } from "@/i18n/config";
 import { actOnItemAction } from "@/lib/actions";
 import type { InboxRow } from "@/lib/store";
@@ -23,6 +24,7 @@ export default function ActDialog({ row, action, onClose }: { row: InboxRow; act
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const toast = useToast();
 
   useEffect(() => {
     const dialog = ref.current;
@@ -38,10 +40,12 @@ export default function ActDialog({ row, action, onClose }: { row: InboxRow; act
       setError(null);
       const res = await actOnItemAction(row.id, action, comment);
       if (res.ok) {
+        toast({ kind: "ok", text: isReturn ? t("inbox.act.toastReturned", { code: row.code }) : t(`inbox.act.toast${row.role}`, { code: row.code }) });
         ref.current?.close();
         router.refresh();
       } else {
         setError(res.error);
+        toast({ kind: "error", text: res.error });
         // Việc đã đổi ở hệ thống gốc: danh sách phía sau hộp thoại cũng được làm mới
         router.refresh();
       }
