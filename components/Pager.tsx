@@ -14,7 +14,7 @@ export default async function Pager({ info, sizeHref, pageHref }: { info: PageIn
     <nav className="pager" aria-label={t("label")}>
       <span className="muted">{t("range", { from: fmtNum(from, locale), to: fmtNum(to, locale), total: fmtNum(info.total, locale) })}</span>
       <div className="pager-end">
-        <span className="seg" role="group" aria-label={t("perPage")}>
+        <span className="seg seg-equal" role="group" aria-label={t("perPage")}>
           {PAGE_SIZES.map((s) => (
             <Link key={s} href={sizeHref(s)} className="seg-btn" aria-current={s === info.size ? "true" : undefined} scroll={false}>
               {s}

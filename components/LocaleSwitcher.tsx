@@ -11,7 +11,7 @@ export default function LocaleSwitcher({ locale }: { locale: Locale }) {
   const t = useTranslations("common");
   const [pending, start] = useTransition();
   return (
-    <div className="seg" role="group" aria-label={t("language")}>
+    <div className="seg seg-equal" role="group" aria-label={t("language")}>
       {LOCALES.map((l) => (
         <button key={l} type="button" className="seg-btn" aria-pressed={l === locale} disabled={pending} onClick={() => start(() => setLocaleAction(l))}>
           {LABEL[l]}

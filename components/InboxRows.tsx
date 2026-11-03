@@ -42,24 +42,27 @@ export default function InboxRows({ rows }: { rows: InboxRow[] }) {
               )}
             </td>
             <td className="nowrap"><span className={`pill pill-${r.priority.toLowerCase()}`}>{t(`priority.${r.priority}`)}</span></td>
-            <td>{r.requesterName}</td>
+            <td className="nowrap">{r.requesterName}</td>
             <td className="nowrap">{fmtDate(r.submittedAt, locale)}</td>
-            <td>
+            <td className="nowrap">
               <div>{t(`roles.${r.role}`)}</div>
               {r.status !== "PENDING" && <div className="muted small">{t(`inbox.status.${r.status}`)} · {fmtDate(r.actedAt, locale)}</div>}
             </td>
             <td className="right nowrap">
-              <div className="btn-row">
-                <button type="button" className="btn btn-sm" onClick={() => setViewing(r)}>{t("common.view")}</button>
-                <a className={`btn btn-sm${r.status === "PENDING" && !r.canAct ? " btn-primary" : ""}`} href={r.href} target="_blank" rel="noreferrer">
-                  {t("common.openOriginal")}
-                  <span aria-hidden="true"> ↗</span>
-                </a>
+              {/* Hàng trên: Xem + Mở ở hệ thống gốc; hàng dưới (chỉ việc xử lý được): Trả lại + Xác nhận / Phê duyệt, rộng bằng nhau và bằng hàng trên */}
+              <div className="btn-stack">
+                <div className="btn-row nowrap">
+                  <button type="button" className="btn btn-sm" onClick={() => setViewing(r)}>{t("common.view")}</button>
+                  <a className={`btn btn-sm${r.status === "PENDING" && !r.canAct ? " btn-primary" : ""}`} href={r.href} target="_blank" rel="noreferrer">
+                    {t("common.openOriginal")}
+                    <span aria-hidden="true"> ↗</span>
+                  </a>
+                </div>
                 {r.canAct && (
-                  <>
+                  <div className="btn-pair">
                     <button type="button" className="btn btn-sm btn-danger" onClick={() => setActing({ row: r, action: "return" })}>{t("inbox.act.returnBtn")}</button>
                     <button type="button" className="btn btn-sm btn-primary" onClick={() => setActing({ row: r, action: "approve" })}>{t(`roles.${r.role}`)}</button>
-                  </>
+                  </div>
                 )}
               </div>
             </td>

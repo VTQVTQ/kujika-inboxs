@@ -93,14 +93,29 @@ export default async function InboxPage({ searchParams }: { searchParams: SP }) 
 
       <InboxSelection>
       <div className="card">
-        <nav className="tabs" aria-label={t("inbox.tabsLabel")}>
-          <Suspense key={dataKey} fallback={TABS.map((id) => <TabLink key={id} id={id} active={tab} href={filterHref({ tab: id })} label={t(`inbox.tabs.${id}`)} />)}>
-            <TabsWithCounts data={data} active={tab} hrefs={Object.fromEntries(TABS.map((id) => [id, filterHref({ tab: id })]))} labels={Object.fromEntries(TABS.map((id) => [id, t(`inbox.tabs.${id}`)]))} />
-          </Suspense>
-        </nav>
+        {/* Tab và ô tìm kiếm chung một hàng */}
+        <div className="tabbar">
+          <nav className="tabs" aria-label={t("inbox.tabsLabel")}>
+            <Suspense key={dataKey} fallback={TABS.map((id) => <TabLink key={id} id={id} active={tab} href={filterHref({ tab: id })} label={t(`inbox.tabs.${id}`)} />)}>
+              <TabsWithCounts data={data} active={tab} hrefs={Object.fromEntries(TABS.map((id) => [id, filterHref({ tab: id })]))} labels={Object.fromEntries(TABS.map((id) => [id, t(`inbox.tabs.${id}`)]))} />
+            </Suspense>
+          </nav>
+          <form className="search" action={PATH} role="search">
+            <input type="hidden" name="tab" value={tab} />
+            {system !== "all" && <input type="hidden" name="system" value={system} />}
+            {Object.entries(keep).map(([k, v]) => (
+              <input key={k} type="hidden" name={k} value={v} />
+            ))}
+            <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.5-3.5" />
+            </svg>
+            <input className="input search-input" type="search" name="q" defaultValue={q} aria-label={t("inbox.search.label")} placeholder={t("inbox.search.placeholder")} />
+          </form>
+        </div>
 
-        <div className="toolbar">
-          {systems.length > 1 && (
+        {systems.length > 1 && (
+          <div className="toolbar">
             <nav className="seg" aria-label={t("inbox.filter.systemLabel")}>
               {[{ key: "all", name: t("inbox.filter.allSystems") }, ...systems.map((s) => ({ key: s.key, name: locale === "ja" ? s.nameJa : s.nameVi }))].map((s) => (
                 <Link key={s.key} href={filterHref({ system: s.key })} className="seg-btn" aria-current={system === s.key ? "true" : undefined} scroll={false}>
@@ -108,16 +123,8 @@ export default async function InboxPage({ searchParams }: { searchParams: SP }) 
                 </Link>
               ))}
             </nav>
-          )}
-          <form className="search" action={PATH} role="search">
-            <input type="hidden" name="tab" value={tab} />
-            {system !== "all" && <input type="hidden" name="system" value={system} />}
-            {Object.entries(keep).map(([k, v]) => (
-              <input key={k} type="hidden" name={k} value={v} />
-            ))}
-            <input className="input" type="search" name="q" defaultValue={q} aria-label={t("inbox.search.label")} placeholder={t("inbox.search.placeholder")} />
-          </form>
-        </div>
+          </div>
+        )}
 
         <div className="table-wrap">
           <table className="tbl">
