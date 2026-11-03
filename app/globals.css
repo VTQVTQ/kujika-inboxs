@@ -201,7 +201,7 @@ th[aria-sort] .sort-mark { color: var(--accent); }
 @media (max-width: 1279px) {
   .tbl th, .tbl td { padding: 8px; }
   .tbl th { white-space: normal; }
-  .tbl .cell-clip { max-width: clamp(120px, calc(14vw - 20px), 200px); }
+  .tbl .cell-clip { max-width: clamp(110px, calc(13vw - 20px), 200px); }
   /* Tiêu đề có thể xuống 2 dòng: cố định 56px để chiều cao khung bảng không đổi; ô thu gọn nên dòng thấp hơn */
   .card { --head-h: 56px; --row-h: 85px; }
   /* Ô dính phải phải có nền đặc (che phần cuộn bên dưới): lấy đúng màu của dòng (trắng / sọc / rê chuột) */
@@ -226,6 +226,10 @@ th[aria-sort] .sort-mark { color: var(--accent); }
 .pill-low { background: var(--low-bg); color: var(--low-fg); }
 .pill-medium { background: var(--mid-bg); color: var(--mid-fg); }
 .pill-high { background: var(--high-bg); color: var(--high-fg); }
+/* Cột Ưu tiên của bảng: Thấp / Trung bình / Cao rộng bằng nhau (theo nhãn dài nhất "Trung bình");
+   tiếng Nhật 低 / 中 / 高 đều một chữ nên giữ kích thước tự nhiên */
+.tbl .pill { width: 7em; text-align: center; box-sizing: border-box; }
+html:lang(ja) .tbl .pill { width: auto; }
 
 /* ---------- Khung chờ ---------- */
 .sk { display: block; height: 12px; margin: 6px 0; border-radius: 4px; background: var(--skeleton-base); position: relative; overflow: hidden; }

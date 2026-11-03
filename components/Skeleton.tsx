@@ -7,7 +7,7 @@ const WIDTH: Record<Shape, string[]> = {
   textSub: ["60%", "40%"],
   codeSub: ["55%", "80%"],
   lines: ["85%", "50%"],
-  pill: ["3.5em"],
+  pill: ["5.5em"],
   date: ["5.5em"],
   /* Cột Thao tác: 2 hàng nút (Xem + Mở ở hệ thống gốc / Trả lại + Xác nhận) */
   button: ["14em", "14em"],

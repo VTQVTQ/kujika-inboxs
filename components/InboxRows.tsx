@@ -44,8 +44,9 @@ export default function InboxRows({ rows }: { rows: InboxRow[] }) {
             <td className="nowrap"><span className={`pill pill-${r.priority.toLowerCase()}`}>{t(`priority.${r.priority}`)}</span></td>
             <td className="nowrap">{r.requesterName}</td>
             <td className="nowrap">{fmtDate(r.submittedAt, locale)}</td>
-            <td className="nowrap">
-              <div>{t(`roles.${r.role}`)}</div>
+            <td>
+              {/* Vai trò không xuống dòng; dòng "Đã xử lý · ngày" (tab Tôi đã xử lý) được xuống dòng để bảng không phải cuộn ngang */}
+              <div className="nowrap">{t(`roles.${r.role}`)}</div>
               {r.status !== "PENDING" && <div className="muted small">{t(`inbox.status.${r.status}`)} · {fmtDate(r.actedAt, locale)}</div>}
             </td>
             <td className="right nowrap">
