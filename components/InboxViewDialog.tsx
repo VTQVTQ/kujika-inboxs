@@ -60,7 +60,8 @@ export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow
       <div className="modal-head">
         <h2 id="inbox-view-title">{t("inbox.view.title", { code: row.code })}</h2>
         <p className="muted">
-          {row.systemName[locale]} · <span className={`pill pill-${row.priority.toLowerCase()}`}>{t(`priority.${row.priority}`)}</span> · {t(`inbox.status.${row.status}`)}
+          {row.systemName[locale]} · <span className={`pill pill-${row.priority.toLowerCase()}`}>{t(`priority.${row.priority}`)}</span>
+          {row.status !== "PENDING" && ` · ${t(`inbox.status.${row.status}`)}`}
           {row.actedAt && ` · ${fmtDateTime(row.actedAt, locale)}`} · {t("inbox.table.colSubmitted")}: {fmtDateTime(row.submittedAt, locale)}
         </p>
       </div>
@@ -125,14 +126,16 @@ export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow
   );
 }
 
-/** Một bước trong ô ký: người đã xử lý (xong / trả lại) được đóng mộc kèm tên + ngày; người chưa xử lý để trống như đơn giấy chưa ký */
+/** Một bước trong ô ký: luôn hiện tên người duyệt; người đã xử lý (xong / trả lại) có thêm mộc + ngày, người chưa xử lý chưa có mộc / ngày như đơn giấy chưa ký. Bước đang chờ chính người xem: tên in đậm (CSS .is-mine) */
 function Stamp({ step, sealLabel }: { step: RouteStep; sealLabel: string }) {
-  if (step.status !== "DONE" && step.status !== "RETURNED") return null;
+  const acted = step.status === "DONE" || step.status === "RETURNED";
+  // Chỉ nổi bật khi đang chờ chính người xem; đã xử lý xong thì như ô bình thường
+  const waitingMe = step.mine && step.status === "PENDING";
   return (
-    <div className="stamp" data-status={step.status}>
-      <span className="seal">{sealLabel}</span>
+    <div className={waitingMe ? "stamp is-mine" : "stamp"} data-status={step.status} aria-current={waitingMe ? "step" : undefined}>
+      {acted && <span className="seal">{sealLabel}</span>}
       <div className="stamp-name">{step.assigneeName ?? step.assignee}</div>
-      <div className="stamp-date">{fmtStampDate(step.actedAt)}</div>
+      {acted && <div className="stamp-date">{fmtStampDate(step.actedAt)}</div>}
     </div>
   );
 }

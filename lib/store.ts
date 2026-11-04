@@ -344,6 +344,8 @@ export interface RouteStep {
   /** WAITING = chưa tới lượt */
   status: InboxStatus | "WAITING";
   actedAt: string | null;
+  /** Bước của chính người đang xem */
+  mine: boolean;
 }
 
 export interface InboxDetail {
@@ -384,6 +386,7 @@ export async function getInboxDetail(account: string, id: number): Promise<Inbox
         assigneeName: s.assigneeName ?? null,
         status: r?.status ?? s.status,
         actedAt: r ? (r.actedAt?.toISOString() ?? null) : s.actedAt,
+        mine: s.assigneeAccount.toLowerCase() === account.toLowerCase(),
       };
     });
   return { route, lines: rows[0]?.lines ?? [] };

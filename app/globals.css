@@ -349,6 +349,8 @@ html:lang(ja) .tbl .pill { width: auto; }
 .stamp + .stamp { margin-top: 8px; }
 .stamp { display: grid; justify-items: center; gap: 2px; }
 .stamp-name { font-size: 12px; }
+/* Bước đang chờ chính người xem: tên in đậm (aria-current="step" trên .stamp lo phần trợ năng) */
+.stamp.is-mine .stamp-name { font-weight: 700; }
 .stamp-date { font-size: 12px; }
 /* Mộc: vòng tròn kép, chữ đậm, hơi nghiêng như đóng tay */
 .seal {
