@@ -5,11 +5,11 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { isLocale, LOCALE_COOKIE } from "@/i18n/config";
 import { z } from "zod";
-import { callSourceAct } from "@/lib/act";
+import { callSourceAct, fetchSourceTemplatePreview } from "@/lib/act";
 import { recordAudit } from "@/lib/audit";
 import { getCurrentUser } from "@/lib/auth";
 import { getAuthProvider, USER_COOKIE } from "@/lib/auth-identity";
-import { findActionableItem, getInboxDetail, type InboxDetail } from "@/lib/store";
+import { findActionableItem, findExportableItem, getInboxDetail, type InboxDetail } from "@/lib/store";
 
 /** Tài khoản AD: chữ, số, ".", "_", "-" */
 const ACCOUNT_PATTERN = /^[a-z0-9._-]{1,100}$/;
@@ -79,4 +79,22 @@ export async function getDetailAction(id: number): Promise<InboxDetail> {
   if (!Number.isInteger(id) || id <= 0) return { route: [], lines: [] };
   const user = await getCurrentUser();
   return getInboxDetail(user.account, id);
+}
+
+export type TemplatePreviewResult = { ok: true; html: string; fileName: string } | { ok: false; error: string };
+
+/**
+ * Xem mẫu trước đề nghị (cùng mẫu với nút Xuất mẫu ở hệ thống gốc): hộp việc chỉ chuyển lời gọi đã ký kèm tài khoản người đang đăng nhập,
+ * hệ thống nguồn tự kiểm tra quyền xem đề nghị. Chỉ đọc nên không ghi nhật ký (tải file mới ghi: route xuat-mau).
+ */
+export async function getTemplatePreviewAction(id: number): Promise<TemplatePreviewResult> {
+  const t = await getTranslations("inbox.template");
+  if (!Number.isInteger(id) || id <= 0) return { ok: false, error: t("notFound") };
+  const user = await getCurrentUser();
+  const found = await findExportableItem(user.account, id);
+  if (!found) return { ok: false, error: t("notFound") };
+  const r = await fetchSourceTemplatePreview(found.system, { sourceId: found.item.sourceId, account: user.account });
+  if (r.ok) return r;
+  if (r.status === 0) return { ok: false, error: t("unreachable") };
+  return { ok: false, error: r.message || t("failed") };
 }

@@ -123,6 +123,17 @@
       "toastDone": "{count} 件を処理しました",
       "toastPartial": "{done} 件を処理しました。{count} 件は処理できませんでした",
       "toastFailed": "{count} 件を処理できませんでした"
+    },
+    "template": {
+      "previewBtn": "様式プレビュー",
+      "title": "様式プレビュー {code}",
+      "note": "元システムの「様式出力」と同じ申請書様式",
+      "download": "様式出力",
+      "loading": "様式を作成中…",
+      "failed": "元システムで申請書様式を作成できませんでした",
+      "retry": "再試行",
+      "notFound": "このタスクが見つかりません",
+      "unreachable": "元システムに接続できません。しばらくしてから再試行してください。"
     }
   },
   "denied": {

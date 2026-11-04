@@ -123,6 +123,17 @@
       "toastDone": "Đã xử lý {count} việc",
       "toastPartial": "Đã xử lý {done} việc, còn {count} việc chưa xử lý được",
       "toastFailed": "Không xử lý được {count} việc"
+    },
+    "template": {
+      "previewBtn": "Xem mẫu trước",
+      "title": "Xem mẫu trước {code}",
+      "note": "Mẫu đề nghị như nút Xuất mẫu ở hệ thống gốc",
+      "download": "Xuất mẫu",
+      "loading": "Đang dựng mẫu…",
+      "failed": "Hệ thống gốc không dựng được mẫu đề nghị",
+      "retry": "Thử lại",
+      "notFound": "Không tìm thấy việc này",
+      "unreachable": "Không kết nối được hệ thống gốc. Hãy thử lại sau."
     }
   },
   "denied": {

@@ -221,6 +221,8 @@ export interface InboxRow {
   href: string;
   /** Đang chờ người này và hệ thống nguồn cho xử lý ngay trên hộp việc */
   canAct: boolean;
+  /** Hệ thống nguồn có kênh gọi đã ký (inlineAct) → xem / xuất được mẫu đề nghị ở mọi trạng thái */
+  canExport: boolean;
   lineCount: number | null;
   totalQty: number | null;
   submittedAt: string;
@@ -305,6 +307,7 @@ export async function listInbox(account: string, opts: { tab: InboxTab; system: 
         status: r.status,
         href: itemUrl(baseUrl, r.deepLink),
         canAct: r.status === "PENDING" && inlineAct,
+        canExport: inlineAct,
         lineCount: r.summary.lineCount ?? null,
         totalQty: r.summary.totalQty ?? null,
         submittedAt: r.submittedAt.toISOString(),
@@ -331,6 +334,20 @@ export async function findActionableItem(account: string, id: number) {
     .from(approvalInbox)
     .innerJoin(inboxSystems, eq(inboxSystems.key, approvalInbox.sourceSystem))
     .where(and(eq(approvalInbox.id, id), ownedBy(account), eq(approvalInbox.status, "PENDING"), eq(inboxSystems.inlineAct, true)))
+    .limit(1);
+  return row ?? null;
+}
+
+/**
+ * Việc của người này (mọi trạng thái) ở hệ thống đang hoạt động có kênh gọi đã ký (inlineAct) — để xem / xuất mẫu đề nghị.
+ * Hệ thống nguồn vẫn tự kiểm tra lại quyền xem đề nghị theo tài khoản. null nếu không phải việc của người này.
+ */
+export async function findExportableItem(account: string, id: number) {
+  const [row] = await db
+    .select({ item: approvalInbox, system: inboxSystems })
+    .from(approvalInbox)
+    .innerJoin(inboxSystems, eq(inboxSystems.key, approvalInbox.sourceSystem))
+    .where(and(eq(approvalInbox.id, id), ownedBy(account), eq(inboxSystems.inlineAct, true)))
     .limit(1);
   return row ?? null;
 }

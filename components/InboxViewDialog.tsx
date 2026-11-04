@@ -6,6 +6,7 @@ import { isLocale } from "@/i18n/config";
 import { getDetailAction } from "@/lib/actions";
 import { fmtDateTime, fmtNum, fmtStampDate } from "@/lib/format";
 import type { InboxDetail, InboxRow, RouteStep } from "@/lib/store";
+import TemplatePreviewDialog from "./TemplatePreviewDialog";
 
 /**
  * Xem một việc. Chỉ dùng các trường chung của hộp việc (không có phần riêng của từng hệ thống)
@@ -18,6 +19,7 @@ export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow
   const ref = useRef<HTMLDialogElement>(null);
 
   const [detail, setDetail] = useState<InboxDetail | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     const dialog = ref.current;
@@ -51,7 +53,10 @@ export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow
       ref={ref}
       className="modal modal-wide modal-light"
       aria-labelledby="inbox-view-title"
-      onClose={onClose}
+      // React chuyển sự kiện close của hộp thoại con (Xem mẫu trước) lên đây: chỉ đóng khi chính hộp thoại này đóng
+      onClose={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       // Bấm ra ngoài hộp thoại (vào phần nền) để đóng
       onClick={(e) => {
         if (e.target === ref.current) ref.current?.close();
@@ -112,16 +117,26 @@ export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow
         </table>
       </div>
 
-      <div className="modal-foot">
-        <button type="button" className="btn" onClick={() => ref.current?.close()}>{t("common.close")}</button>
-        {openLink}
-        {row.canAct && (
-          <>
-            <button type="button" className="btn btn-danger" onClick={() => onAct("return")}>{t("inbox.act.returnBtn")}</button>
-            <button type="button" className="btn btn-primary" onClick={() => onAct("approve")}>{t(`roles.${row.role}`)}</button>
-          </>
-        )}
+      <div className="modal-foot view-foot">
+        {/* Hàng 1 bên trái: mẫu đề nghị Excel của hệ thống nguồn (xem trước + Xuất mẫu), ở mọi trạng thái */}
+        {row.canExport ? <button type="button" className="btn" onClick={() => setPreviewOpen(true)}>{t("inbox.template.previewBtn")}</button> : <span />}
+        {/*
+          Lưới 3 cột bằng nhau, co theo nội dung (bên phải):
+          hàng 1 = Mở hệ thống gốc trải 2 cột cuối → rộng đúng Trả lại + khoảng cách + Xác nhận;
+          hàng 2 = Đóng, Trả lại, Xác nhận (không có quyền xử lý: chỉ Đóng ở cột cuối)
+        */}
+        <div className="view-actions">
+          {openLink}
+          <button type="button" className={`btn${row.canAct ? "" : " va-last"}`} onClick={() => ref.current?.close()}>{t("common.close")}</button>
+          {row.canAct && (
+            <>
+              <button type="button" className="btn btn-danger" onClick={() => onAct("return")}>{t("inbox.act.returnBtn")}</button>
+              <button type="button" className="btn btn-primary" onClick={() => onAct("approve")}>{t(`roles.${row.role}`)}</button>
+            </>
+          )}
+        </div>
       </div>
+      {previewOpen && <TemplatePreviewDialog row={row} onClose={() => setPreviewOpen(false)} />}
     </dialog>
   );
 }

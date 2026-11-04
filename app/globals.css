@@ -267,6 +267,15 @@ html:lang(ja) .tbl .pill { width: auto; }
 .info-grid dd { margin: 2px 0 0; overflow-wrap: anywhere; }
 .info-grid .span { grid-column: 1 / -1; }
 .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 24px 20px; }
+/*
+ * Nút trong hộp thoại xem việc, 2 hàng: Xem mẫu trước sát trái (hàng 1); bên phải là lưới 3 cột bằng nhau co theo nội dung
+ * (inline-grid → 1fr = cột rộng nhất cần): Mở hệ thống gốc trải 2 cột cuối ở hàng 1, Đóng / Trả lại / Xác nhận ở hàng 2.
+ */
+.view-foot { justify-content: space-between; align-items: flex-start; }
+.view-actions { display: inline-grid; grid-template-columns: repeat(3, 1fr); gap: 10px 8px; }
+.view-actions > :first-child { grid-row: 1; grid-column: 2 / 4; }
+.view-actions > :not(:first-child) { grid-row: 2; }
+.view-actions > .va-last { grid-column: 3; }
 
 /* ---------- Thông báo nhanh ---------- */
 /* Thẻ trắng, viền trái 4px theo loại: xanh lá = thành công, vàng cam = một phần chưa xong, đỏ = lỗi */
@@ -334,6 +343,22 @@ html:lang(ja) .tbl .pill { width: auto; }
 
 /* ---------- Biểu mẫu trong hộp thoại xem (bố cục như đơn giấy) ---------- */
 .modal-wide { width: min(720px, calc(100vw - 32px)); }
+/* Xem mẫu trước đề nghị: đầu / chân popup cố định, chỉ vùng tờ mẫu cuộn; tờ mẫu nằm trong iframe (TemplatePreviewDialog) */
+/*
+ * Xem mẫu trước: kích thước cố định theo viewport (không theo nội dung) → đang tải / mẫu ngắn / mẫu dài đều cùng một cỡ.
+ * Đầu + chân đứng yên, chỉ vùng tài liệu (.tpl-body) cuộn dọc.
+ */
+.modal-tpl { width: min(1040px, calc(100vw - 32px)); height: calc(100dvh - 32px); max-height: calc(100dvh - 32px); }
+.modal-tpl[open] { display: flex; flex-direction: column; }
+.modal-tpl .modal-head, .modal-tpl .modal-foot { flex: none; }
+.tpl-body { flex: 1 1 0; min-height: 0; overflow-x: auto; overflow-y: auto; margin: 16px 24px 0; border-radius: 8px; background: #e9ebef; }
+/* Đóng và Xuất mẫu rộng bằng nhau (lưới 2 cột 1fr co theo nút rộng hơn) */
+.tpl-actions { display: inline-grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tpl-frame { display: block; width: 100%; min-height: 320px; border: 0; }
+.tpl-state { min-height: 320px; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 32px; }
+.tpl-state .sk { margin: 0; }
+.tpl-state .muted { text-align: center; }
+.tpl-error { align-items: center; color: var(--high-fg); text-align: center; }
 .paper { margin: 16px 24px; padding: 20px 24px; background: #fff; color: #000; border: 1px solid var(--border); display: grid; gap: 16px; }
 .paper-applicant { display: flex; align-items: baseline; gap: 16px; border-bottom: 1px solid #000; width: min(60%, 360px); padding-bottom: 2px; margin: 0; }
 .paper-name { font-weight: 500; }
