@@ -246,7 +246,7 @@ const countWhere = async (where: SQL | undefined) => {
 
 /**
  * Danh sách việc của một người theo tab + bộ lọc, phân trang + sắp xếp phía server.
- * Không có sort: Chờ xử lý = gửi sớm nhất trước; Đã xử lý = vừa xử lý trước. Luôn thêm id làm tiêu chí phụ.
+ * Không có sort: Chờ xử lý = ưu tiên cao trước, cùng mức thì ngày gửi (申請) mới nhất trước; Đã xử lý = vừa xử lý trước. Luôn thêm id làm tiêu chí phụ.
  */
 export async function listInbox(account: string, opts: { tab: InboxTab; system: string; q: string }, table: TableQuery<InboxSort>) {
   const mine = ownedBy(account);
@@ -272,7 +272,7 @@ export async function listInbox(account: string, opts: { tab: InboxTab; system: 
           table.sort === "priority"
           ? [dir(approvalInbox.priority), dir(approvalInbox.id)]
           : opts.tab === "todo"
-            ? [asc(approvalInbox.submittedAt), asc(approvalInbox.id)]
+            ? [desc(approvalInbox.priority), desc(approvalInbox.submittedAt), desc(approvalInbox.id)]
             : [sql`${approvalInbox.actedAt} DESC NULLS LAST`, desc(approvalInbox.id)];
 
   // Đếm trước để kẹp trang (trang vượt quá → trang cuối) rồi mới lấy các dòng của trang
