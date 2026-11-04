@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { InboxRow } from "@/lib/store";
 import BulkActDialog from "./BulkActDialog";
 
@@ -89,15 +89,43 @@ function BulkBar() {
   const [acting, setActing] = useState<"approve" | "return" | null>(null);
   const rows = useMemo(() => [...selected.values()], [selected]);
 
+  const visible = rows.length > 0;
+  const clearRef = useRef<HTMLButtonElement>(null);
+  const returnRef = useRef<HTMLButtonElement>(null);
+  const approveRef = useRef<HTMLButtonElement>(null);
+  const labels = `${t("clear")}|${t("returnAll")}|${t("approveAll")}`;
+
+  // Bỏ chọn = Trả lại = W/2, Xác nhận/Phê duyệt = W. Hai nút nhỏ không nằm cạnh nhau (giữa là khoảng trống co giãn) nên đo độ rộng
+  // tự nhiên của cả 3 rồi đặt: u = max(Bỏ chọn, Trả lại, Xác nhận / 2) → nút nhỏ u, nút chính 2u (chữ không bao giờ bị tràn)
+  useLayoutEffect(() => {
+    if (!visible) return;
+    const btns = [clearRef.current, returnRef.current, approveRef.current];
+    if (btns.some((b) => !b)) return;
+    const [c, r, a] = btns as HTMLButtonElement[];
+    const size = () => {
+      for (const b of btns as HTMLButtonElement[]) b.style.width = "";
+      const u = Math.ceil(Math.max(c.getBoundingClientRect().width, r.getBoundingClientRect().width, a.getBoundingClientRect().width / 2) * 64) / 64;
+      c.style.width = r.style.width = `${u}px`;
+      a.style.width = `${u * 2}px`;
+    };
+    size();
+    let alive = true;
+    // Phông chữ tải xong có thể làm đổi độ rộng chữ
+    document.fonts?.ready.then(() => alive && size());
+    return () => {
+      alive = false;
+    };
+  }, [visible, labels]);
+
   return (
     <>
-      {rows.length > 0 && (
+      {visible && (
         <div className="bulk-bar" role="region" aria-label={t("label")}>
           <span className="strong">{t("selected", { count: rows.length })}</span>
-          <button type="button" className="btn btn-sm" onClick={clear}>{t("clear")}</button>
+          <button ref={clearRef} type="button" className="btn btn-sm" onClick={clear}>{t("clear")}</button>
           <span className="bulk-spacer" />
-          <button type="button" className="btn btn-sm btn-danger" onClick={() => setActing("return")}>{t("returnAll")}</button>
-          <button type="button" className="btn btn-sm btn-primary" onClick={() => setActing("approve")}>{t("approveAll")}</button>
+          <button ref={returnRef} type="button" className="btn btn-sm btn-danger" onClick={() => setActing("return")}>{t("returnAll")}</button>
+          <button ref={approveRef} type="button" className="btn btn-sm btn-primary" onClick={() => setActing("approve")}>{t("approveAll")}</button>
         </div>
       )}
       {acting && <BulkActDialog rows={rows} action={acting} onClose={() => setActing(null)} onDone={clear} />}

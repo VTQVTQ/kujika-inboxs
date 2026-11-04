@@ -215,6 +215,8 @@ th[aria-sort] .sort-mark { color: var(--accent); }
   background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
 }
 .bulk-spacer { flex: 1; }
+/* Độ rộng nút do InboxSelection đặt (Bỏ chọn = Trả lại = ½ Xác nhận): không co lại để giữ đúng tỷ lệ */
+.bulk-bar .btn { flex: none; }
 .bulk-list { margin: 0; padding-left: 18px; max-height: 180px; overflow-y: auto; font-size: 13px; }
 /* Trừ 20px: chừa chỗ cho thanh cuộn dọc của khung bảng để không phát sinh cuộn ngang */
 .cell-clip { max-width: clamp(160px, calc(20vw - 20px), 560px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
