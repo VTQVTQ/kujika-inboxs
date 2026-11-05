@@ -3,13 +3,14 @@ import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 import InboxRows from "@/components/InboxRows";
+import { QuickFilter, SearchPanel } from "@/components/InboxSearch";
 import { InboxSelection, ResetSelection, SelectAllTh } from "@/components/InboxSelection";
 import Pager from "@/components/Pager";
 import SortTh from "@/components/SortTh";
 import { PagerSkeleton, SkeletonRows } from "@/components/Skeleton";
 import { isLocale } from "@/i18n/config";
 import { getCurrentUser } from "@/lib/auth";
-import { INBOX_SORTS, type InboxTab, listActiveSystems, listInbox } from "@/lib/store";
+import { INBOX_SORTS, type InboxSearch, type InboxTab, listActiveSystems, listInbox } from "@/lib/store";
 import { keepTableParams, parseTableQuery } from "@/lib/table";
 import { COLUMNS, TABS } from "./columns";
 
@@ -30,20 +31,21 @@ export default async function InboxPage({ searchParams }: { searchParams: SP }) 
   const tab = TABS.find((x) => x === one(sp.tab)) ?? "todo";
   // Giá trị lạ trên URL → tất cả hệ thống
   const system = systems.find((s) => s.key === one(sp.system))?.key ?? "all";
-  const q = one(sp.q).slice(0, 100);
+  // Điều kiện tìm kiếm (khung tìm kiếm phía trên bảng)
+  const search: InboxSearch = { code: one(sp.code).trim().slice(0, 100), title: one(sp.title).trim().slice(0, 100), requester: one(sp.requester).trim().slice(0, 100) };
   const table = parseTableQuery(sp, INBOX_SORTS);
   const keep = keepTableParams(table);
-  const filtered = q.trim() !== "" || system !== "all";
+  const filtered = Object.values(search).some((v) => v !== "") || system !== "all";
 
   // Không chờ ở đây: khung trang hiện ngay; số trên tab + thân bảng chờ chung một lần truy vấn trong <Suspense>
-  const data = listInbox(user.account, { tab, system, q }, table);
+  const data = listInbox(user.account, { tab, system, ...search }, table);
   // Gắn sẵn một nhánh xử lý để Node không coi là "unhandled rejection" khi await muộn; lỗi vẫn ném ở nơi await (error.tsx)
   data.catch(() => undefined);
-  const dataKey = JSON.stringify([tab, system, q, table.page, table.size, table.sort, table.dir]);
+  const dataKey = JSON.stringify([tab, system, search, table.page, table.size, table.sort, table.dir]);
 
   /** Link giữ bộ lọc hiện tại, đổi các tham số trong patch (rỗng = bỏ) */
   const href = (patch: Record<string, string>) => {
-    const p = new URLSearchParams({ tab, system, q, ...keep, ...(table.page > 1 ? { page: String(table.page) } : {}), ...patch });
+    const p = new URLSearchParams({ tab, system, ...search, ...keep, ...(table.page > 1 ? { page: String(table.page) } : {}), ...patch });
     for (const [k, v] of [...p.entries()]) if (!v || (v === "all" && k === "system")) p.delete(k);
     const s = p.toString();
     return s ? `${PATH}?${s}` : PATH;
@@ -74,32 +76,21 @@ export default async function InboxPage({ searchParams }: { searchParams: SP }) 
 
   return (
     <>
-      <header className="page-header">
-        <h1>{t("meta.appTitle")}</h1>
-        <p>{t("inbox.subtitle")}</p>
-      </header>
+      {/* Tiêu đề không hiện trên màn hình (thanh trên cùng đã có tên hệ thống); giữ cho trình đọc màn hình */}
+      <h1 className="sr-only">{t("meta.appTitle")}</h1>
 
       <InboxSelection>
+      {/* Tìm kiếm giữ tab / hệ thống / số dòng / sắp xếp, về trang 1 */}
+      <SearchPanel values={search} keep={{ ...(tab !== "todo" ? { tab } : {}), ...(system !== "all" ? { system } : {}), ...keep }} />
       <div className="card">
-        {/* Tab và ô tìm kiếm chung một hàng */}
+        {/* Tab và ô lọc nhanh chung một hàng */}
         <div className="tabbar">
           <nav className="tabs" aria-label={t("inbox.tabsLabel")}>
             <Suspense key={dataKey} fallback={TABS.map((id) => <TabLink key={id} id={id} active={tab} href={filterHref({ tab: id })} label={t(`inbox.tabs.${id}`)} />)}>
               <TabsWithCounts data={data} active={tab} hrefs={Object.fromEntries(TABS.map((id) => [id, filterHref({ tab: id })]))} labels={Object.fromEntries(TABS.map((id) => [id, t(`inbox.tabs.${id}`)]))} />
             </Suspense>
           </nav>
-          <form className="search" action={PATH} role="search">
-            <input type="hidden" name="tab" value={tab} />
-            {system !== "all" && <input type="hidden" name="system" value={system} />}
-            {Object.entries(keep).map(([k, v]) => (
-              <input key={k} type="hidden" name={k} value={v} />
-            ))}
-            <svg className="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-3.5-3.5" />
-            </svg>
-            <input className="input search-input" type="search" name="q" defaultValue={q} aria-label={t("inbox.search.label")} placeholder={t("inbox.search.placeholder")} />
-          </form>
+          <QuickFilter />
         </div>
 
         {systems.length > 1 && (

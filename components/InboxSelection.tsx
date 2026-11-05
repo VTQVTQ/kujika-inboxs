@@ -13,6 +13,9 @@ type Ctx = {
   toggleAll: () => void;
   clear: () => void;
   setPageRows: (rows: readonly InboxRow[]) => void;
+  /** Ô lọc nhanh ở hàng tab: lọc các dòng đang hiển thị ngay trên trình duyệt (không gọi server) */
+  quick: string;
+  setQuick: (v: string) => void;
 };
 
 const SelectionContext = createContext<Ctx | null>(null);
@@ -49,7 +52,11 @@ export function InboxSelection({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const value = useMemo(() => ({ selected, pageRows, toggle, toggleAll, clear, setPageRows }), [selected, pageRows, toggle, toggleAll, clear, setPageRows]);
+  const [quick, setQuick] = useState("");
+  const value = useMemo(
+    () => ({ selected, pageRows, toggle, toggleAll, clear, setPageRows, quick, setQuick }),
+    [selected, pageRows, toggle, toggleAll, clear, setPageRows, quick],
+  );
   return (
     <SelectionContext.Provider value={value}>
       {children}

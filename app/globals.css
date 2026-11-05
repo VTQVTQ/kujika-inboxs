@@ -104,8 +104,6 @@ h1, h2, p { margin: 0; }
 .user-chip { padding: 4px 10px; background: var(--accent-soft); color: var(--accent); border-radius: 999px; font-weight: 500; }
 /* Màn hình rộng (1920) dùng gần hết bề ngang; lề hai bên co giãn theo màn hình */
 .content { max-width: 1760px; margin: 0 auto; padding: 24px clamp(16px, 2.5vw, 40px); display: grid; gap: 16px; }
-.page-header h1 { font-size: 22px; line-height: 1.3; text-wrap: balance; }
-.page-header p { color: var(--text-muted); margin-top: 4px; }
 
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 .state-box { padding: 32px; display: grid; gap: 12px; justify-items: start; }
@@ -129,7 +127,20 @@ h1, h2, p { margin: 0; }
 .search { margin-left: auto; position: relative; display: flex; align-items: center; }
 /* Kính lúp nằm trong ô, bên trái; chữ nhập lùi vào chừa chỗ cho biểu tượng */
 .search-icon { position: absolute; left: 10px; color: var(--text-muted); pointer-events: none; }
-.search .search-input { padding-left: 34px; min-width: 320px; }
+/* --quick-w do SearchPanel đặt = 2 × (Xóa + khoảng cách + Tìm kiếm); màn hẹp (≤ 640px) vẫn rộng hết hàng (quy tắc trong @media phía dưới) */
+.search .search-input { padding-left: 34px; min-width: 320px; width: var(--quick-w, auto); }
+
+/* Khung điều kiện tìm kiếm phía trên bảng: 3 ô chia đều + nhóm nút Xóa / Tìm kiếm cuối hàng (đáy nút thẳng đáy ô nhập) */
+.search-panel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; align-items: end; gap: 12px 16px; padding: 16px; }
+.search-field { display: grid; gap: 6px; min-width: 0; }
+.search-field-label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+.search-field .input { width: 100%; min-width: 0; }
+/* Độ rộng do SearchPanel đặt (mép trái Xóa = mép trái nút Xem trên lưới); không nhỏ hơn cỡ tự nhiên của hai nút */
+.search-actions { display: inline-grid; grid-template-columns: 1fr 1fr; gap: 8px; min-width: max-content; }
+@media (max-width: 900px) {
+  .search-panel { grid-template-columns: 1fr; }
+  .search-actions { justify-self: end; }
+}
 
 .seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; background: var(--surface); }
 .seg-btn { padding: 5px 12px; border: 0; background: transparent; color: var(--text-muted); font: inherit; cursor: pointer; white-space: nowrap; }

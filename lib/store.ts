@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, count, desc, eq, ilike, inArray, ne, or, type SQL, sql } from "drizzle-orm";
+import { and, asc, type Column, count, desc, eq, ilike, inArray, ne, or, type SQL, sql } from "drizzle-orm";
 import { approvalInbox, inboxSystems, type ApprovalInboxRow, type InboxLine, type InboxRouteStep, type InboxStatus, type RequestPriority, type StepRole } from "@/db/schema";
 import { ApiError } from "@/lib/api-error";
 import type { InboxItem, patchItemSchema } from "@/lib/contract";
@@ -250,18 +250,27 @@ const countWhere = async (where: SQL | undefined) => {
  * Danh sách việc của một người theo tab + bộ lọc, phân trang + sắp xếp phía server.
  * Không có sort: Chờ xử lý = ưu tiên cao trước, cùng mức thì ngày gửi (申請) mới nhất trước; Đã xử lý = vừa xử lý trước. Luôn thêm id làm tiêu chí phụ.
  */
-export async function listInbox(account: string, opts: { tab: InboxTab; system: string; q: string }, table: TableQuery<InboxSort>) {
+/** Điều kiện tìm kiếm trên màn hình (mỗi ô chứa chuỗi, không phân biệt hoa thường; các ô có giá trị kết hợp AND) */
+export interface InboxSearch {
+  code: string;
+  title: string;
+  requester: string;
+}
+
+export async function listInbox(account: string, opts: { tab: InboxTab; system: string } & InboxSearch, table: TableQuery<InboxSort>) {
   const mine = ownedBy(account);
   const tabWhere: Record<InboxTab, SQL | undefined> = {
     todo: and(mine, eq(approvalInbox.status, "PENDING")),
     done: and(mine, ne(approvalInbox.status, "PENDING")),
   };
 
-  const q = opts.q.trim();
+  const contains = (col: Column, v: string) => (v.trim() ? ilike(col, likePattern(v.trim())) : undefined);
   const filters = and(
     tabWhere[opts.tab],
     opts.system !== "all" ? eq(approvalInbox.sourceSystem, opts.system) : undefined,
-    q ? or(ilike(approvalInbox.code, likePattern(q)), ilike(approvalInbox.title, likePattern(q)), ilike(approvalInbox.requesterName, likePattern(q))) : undefined,
+    contains(approvalInbox.code, opts.code),
+    contains(approvalInbox.title, opts.title),
+    contains(approvalInbox.requesterName, opts.requester),
   );
 
   const dir = table.dir === "asc" ? asc : desc;

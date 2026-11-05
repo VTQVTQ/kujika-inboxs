@@ -24,7 +24,6 @@
     "HIGH": "Cao"
   },
   "inbox": {
-    "subtitle": "Tổng hợp các đề nghị ở mọi hệ thống đang chờ bạn xác nhận, phê duyệt.",
     "tabsLabel": "Nhóm việc",
     "tabs": {
       "todo": "Chờ tôi xử lý",
@@ -42,8 +41,16 @@
       "allSystems": "Tất cả hệ thống"
     },
     "search": {
-      "label": "Tìm việc",
-      "placeholder": "Mã đề nghị, nội dung, người đề nghị"
+      "label": "Lọc nhanh trên lưới",
+      "placeholder": "Lọc các dòng đang hiển thị"
+    },
+    "searchForm": {
+      "label": "Điều kiện tìm kiếm",
+      "code": "Mã đề nghị",
+      "title": "Nội dung đề nghị",
+      "requester": "Người đề nghị",
+      "clear": "Xóa",
+      "submit": "Tìm kiếm"
     },
     "table": {
       "colCode": "Hệ thống / Mã đề nghị",
@@ -86,7 +93,8 @@
     "empty": {
       "none": "Chưa có việc nào",
       "noneFiltered": "Không có kết quả phù hợp",
-      "hint": "Thử đổi tab, hệ thống hoặc từ khóa tìm kiếm."
+      "hint": "Thử đổi tab, hệ thống hoặc từ khóa tìm kiếm.",
+      "quickHint": "Không có dòng nào trên trang này khớp ô lọc nhanh."
     },
     "error": {
       "title": "Không tải được danh sách việc",

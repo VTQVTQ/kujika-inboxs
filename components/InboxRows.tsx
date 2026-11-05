@@ -1,14 +1,17 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { COLUMNS } from "@/app/(app)/viec-can-xu-ly/columns";
 import { isLocale } from "@/i18n/config";
 import { fmtDate, fmtNum } from "@/lib/format";
 import type { InboxRow } from "@/lib/store";
 import ActDialog from "./ActDialog";
 import { useInboxSelection } from "./InboxSelection";
 import InboxViewDialog from "./InboxViewDialog";
+
+const norm = (s: string) => s.normalize("NFC").toLocaleLowerCase();
 
 /** Thân bảng việc cần xử lý. Nhấp đúp vào dòng (hoặc nút Xem) mở hộp thoại xem nhanh; "Mở" đưa sang hệ thống gốc ở tab mới */
 export default function InboxRows({ rows }: { rows: InboxRow[] }) {
@@ -18,15 +21,45 @@ export default function InboxRows({ rows }: { rows: InboxRow[] }) {
   const [viewing, setViewing] = useState<InboxRow | null>(null);
   const [acting, setActing] = useState<{ row: InboxRow; action: "approve" | "return" } | null>(null);
 
-  const { selected, toggle, setPageRows } = useInboxSelection();
+  const { selected, toggle, setPageRows, quick } = useInboxSelection();
+
+  // Lọc nhanh trên lưới: so khớp (không phân biệt hoa thường) với chữ đang hiện ở các cột của dòng
+  const visible = useMemo(() => {
+    const needle = norm(quick.trim());
+    if (!needle) return rows;
+    return rows.filter((r) =>
+      norm(
+        [
+          r.systemName[locale],
+          r.code,
+          r.title,
+          t(`priority.${r.priority}`),
+          r.requesterName,
+          fmtDate(r.submittedAt, locale),
+          t(`roles.${r.role}`),
+          r.status !== "PENDING" ? `${t(`inbox.status.${r.status}`)} ${fmtDate(r.actedAt, locale)}` : "",
+        ].join("\n"),
+      ).includes(needle),
+    );
+  }, [rows, quick, locale, t]);
+
+  // Chọn tất cả / thao tác hàng loạt chỉ áp dụng cho các dòng đang hiện
   useEffect(() => {
-    setPageRows(rows.filter((r) => r.canAct));
-  }, [rows, setPageRows]);
+    setPageRows(visible.filter((r) => r.canAct));
+  }, [visible, setPageRows]);
 
   return (
     <>
       <tbody>
-        {rows.map((r) => (
+        {visible.length === 0 && (
+          <tr>
+            <td colSpan={COLUMNS.length} className="empty">
+              <strong>{t("inbox.empty.noneFiltered")}</strong>
+              <span className="muted">{t("inbox.empty.quickHint")}</span>
+            </td>
+          </tr>
+        )}
+        {visible.map((r) => (
           <tr key={r.id} className="row-action" title={t("common.dblHint")} aria-selected={selected.has(r.id) || undefined} onDoubleClick={() => setViewing(r)}>
             <td className="col-check" onDoubleClick={(e) => e.stopPropagation()}>
               {r.canAct && <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggle(r)} aria-label={t("inbox.bulk.selectRow", { code: r.code })} />}

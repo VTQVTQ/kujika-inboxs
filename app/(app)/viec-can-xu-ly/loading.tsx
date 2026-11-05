@@ -1,9 +1,10 @@
 import { getTranslations } from "next-intl/server";
+import { SearchPanelSkeleton } from "@/components/InboxSearch";
 import { PagerSkeleton, SkeletonRows } from "@/components/Skeleton";
 import { COLUMNS, TABS } from "./columns";
 
 /**
- * Khung chờ cả trang (lần đầu vào trang / chuyển trang): dựng bằng đúng các lớp của trang thật — tiêu đề, hàng tab + ô tìm kiếm,
+ * Khung chờ cả trang (lần đầu vào trang / chuyển trang): dựng bằng đúng các lớp của trang thật — khung tìm kiếm (ô nhập khóa), hàng tab + ô tìm kiếm,
  * đầu bảng, khung bảng cao cố định 6 dòng, thanh phân trang — để khi dữ liệu về bố cục không nhảy.
  * Chữ cố định (tiêu đề, tên tab, tên cột) hiện thật; phần phụ thuộc dữ liệu là khối xám.
  */
@@ -11,10 +12,8 @@ export default async function Loading() {
   const t = await getTranslations();
   return (
     <>
-      <header className="page-header">
-        <h1>{t("meta.appTitle")}</h1>
-        <p>{t("inbox.subtitle")}</p>
-      </header>
+      <h1 className="sr-only">{t("meta.appTitle")}</h1>
+      <SearchPanelSkeleton />
 
       <div className="card" role="status" aria-busy="true" aria-label={t("common.loading")}>
         <div className="tabbar">
