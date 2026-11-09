@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getTemplatePreviewAction, type TemplatePreviewResult } from "@/lib/actions";
+import { withBasePath } from "@/lib/base-path";
 import type { InboxRow } from "@/lib/store";
 
 /**
@@ -93,7 +94,7 @@ export default function TemplatePreviewDialog({ row, onClose }: { row: InboxRow;
         <div className="tpl-actions">
           <button type="button" className="btn" onClick={() => ref.current?.close()}>{t("common.close")}</button>
           {result?.ok ? (
-            <a className="btn btn-primary" href={`/viec-can-xu-ly/${row.id}/xuat-mau`} download>{t("inbox.template.download")}</a>
+            <a className="btn btn-primary" href={withBasePath(`/viec-can-xu-ly/${row.id}/xuat-mau`)} download>{t("inbox.template.download")}</a>
           ) : (
             <span className="btn btn-primary" aria-disabled="true">{t("inbox.template.download")}</span>
           )}

@@ -118,7 +118,8 @@ type NoParams = { params: Promise<Record<string, never>> };
 /** Ghi một dòng nhật ký cho yêu cầu vừa xử lý xong (hệ thống / đề nghị / bước lấy từ tham số đường dẫn) */
 async function writeAudit(action: string, req: NextRequest, ctx: RouteContext, status: number, errorCode?: string) {
   const store = auditContext();
-  const params = await ctx.params.catch(() => undefined);
+  // Ở server standalone (production), route không có tham số động nhận ctx.params = undefined (không phải Promise)
+  const params = await Promise.resolve(ctx.params).catch(() => undefined);
   await recordAudit({
     action,
     result: status < 400 ? "OK" : status === 401 || status === 403 ? "DENIED" : "ERROR",

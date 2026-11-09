@@ -5,8 +5,8 @@
 //   npm run start:test    bản build (chạy `npm run build` trước) — nhanh hơn cho nhiều người thử
 //
 // Cần trong .env: AUTH_AD_DOMAIN, TEST_LOGIN_CODE (password đưa cho người thử).
-// Máy khác vào bằng http://<IP máy này>:<PORT> (mặc định 3000). Không dùng cho máy chủ thật (server.js / SSO):
-// lib/auth-identity.ts từ chối nếu bật cùng SSO_ENABLED=1.
+// Máy khác vào bằng http://<IP máy này>:<PORT>/inbox (mặc định cổng 3001). KHÔNG dùng cho máy chủ thật (chạy sau IIS):
+// AUTH_TEST_LOGIN chỉ do script này đặt, không bao giờ ghi vào .env của máy chủ.
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -32,20 +32,18 @@ if (missing.length) {
   console.error(`Thiếu cấu hình trong .env: ${missing.join(", ")}`);
   process.exit(1);
 }
-if (env.SSO_ENABLED === "1") {
-  console.error("SSO_ENABLED=1 đang bật: không chạy mô phỏng SSO cùng SSO thật.");
-  process.exit(1);
-}
 if (mode === "start" && !existsSync(path.join(ROOT, ".next", "BUILD_ID"))) {
   console.error("Chưa có bản build: chạy `npm run build` trước `npm run start:test`.");
   process.exit(1);
 }
 
 const port = env.PORT || "3001";
+// Tiền tố đường dẫn của app (lib/base-path.ts) — đọc bằng regex vì file này là .mjs, không import được .ts
+const basePath = /BASE_PATH\s*=\s*"([^"]*)"/.exec(readFileSync(path.join(ROOT, "lib", "base-path.ts"), "utf8"))?.[1] ?? "";
 const lan = Object.values(os.networkInterfaces())
   .flat()
   .filter((i) => i && i.family === "IPv4" && !i.internal)
-  .map((i) => `http://${i.address}:${port}`);
+  .map((i) => `http://${i.address}:${port}${basePath}`);
 // Chỉ in ở cửa sổ chạy server (người thử không thấy): giao diện cố ý giống hệt SSO thật
 console.log("⚠  CHẾ ĐỘ MÔ PHỎNG SSO — tài khoản giả định + password chung, KHÔNG dùng cho máy chủ thật.");
 console.log(`   Domain: ${env.AUTH_AD_DOMAIN.toUpperCase()} · Máy khác vào: ${lan.join(" , ") || "(không tìm thấy IP mạng)"}`);

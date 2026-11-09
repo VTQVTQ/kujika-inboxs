@@ -23,16 +23,24 @@ npm install
 cp .env.example .env        # điền DATABASE_URL, INBOX_ADMIN_TOKEN, AUTH_AD_DOMAIN
 npm run db:create           # (tùy chọn) tạo DB + tài khoản: xem scripts/create-db.mjs
 npm run db:migrate
-npm run dev                 # http://localhost:3001  (dev: gõ tài khoản thử ở thanh trên cùng)
+npm run dev                 # http://localhost:3001/inbox  (dev: gõ tài khoản thử ở thanh trên cùng)
 ```
 
-Production: `npm run build && npm run start` (`server.js`, SSO Windows qua `node-expose-sspi` hoặc IIS với `SSO_MODE=iis`).
+Ứng dụng chạy dưới tiền tố `/inbox` (`basePath`, `lib/base-path.ts`) để dùng chung domain với kho (`/storage`): mọi URL dựng tay
+(`fetch`, `<a href>`, `window.open`) phải đi qua `withBasePath()`; `next/link`, `redirect()`, `router.push` tự thêm tiền tố.
+API cho hệ thống nguồn vì vậy nằm ở `/inbox/api/v1`.
+
+Production: `npm run build && npm run start` — chạy `.next/standalone/server.js` do chính Next sinh (`output: "standalone"`);
+`scripts/post-build.mjs` vá mặc định cổng 3001 + hostname `127.0.0.1` và copy `public/`, `.next/static`.
+Không còn `server.js` / SSPI / Express tự viết. Triển khai Windows Server + IIS offline: [docs/trien-khai-iis-offline.md](docs/trien-khai-iis-offline.md)
+(`deploy/build-release.ps1` → `deploy/install.ps1`).
 LAN test không có domain thật: `npm run dev:test` / `npm run start:test` (cần `TEST_LOGIN_CODE`).
 `npm run typecheck`, `npm run lint`.
 
 ## Đăng nhập
 
-Danh tính lấy như hệ thống kho: `sso` (server.js), `iis` (IIS + `SSO_PROXY_SECRET`), `test` (hộp thoại Basic), `dev` (cookie, chỉ khi chạy dev).
+Danh tính lấy như hệ thống kho: `iis` (mặc định khi `NODE_ENV=production`: IIS Windows Authentication + proxy, header `x-remote-user` = `DOMAIN\account`,
+**không có mã bí mật** — Node chỉ nghe `127.0.0.1` nên chỉ IIS trên cùng máy gọi tới được), `test` (hộp thoại Basic), `dev` (cookie, chỉ khi chạy dev hoặc `ALLOW_USER_SWITCH=1`).
 Không có bảng người dùng: ai xác thực được **chỉ thấy việc có `assignee_account` trùng tài khoản của mình**
 (tài khoản AD không kèm domain, chữ thường). `/api/v1` không dùng danh tính Windows mà dùng mã Bearer.
 

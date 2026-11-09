@@ -118,3 +118,39 @@ export const approvalInbox = pgTable(
 
 export type InboxSystemRow = typeof inboxSystems.$inferSelect;
 export type ApprovalInboxRow = typeof approvalInbox.$inferSelect;
+
+/** Trạng thái xử lý góp ý (text + CHECK, không dùng enum để chỉ thêm đúng 1 bảng) */
+export const FEEDBACK_STATUSES = ["NEW", "IN_PROGRESS", "DONE", "REJECTED"] as const;
+export type FeedbackStatus = (typeof FEEDBACK_STATUSES)[number];
+
+/** Hòm thư góp ý: người dùng gửi mong muốn / báo lỗi / bất cập tới nhóm phát triển (một chiều) */
+export const feedback = pgTable(
+  "feedback",
+  {
+    /** Mã tự tăng */
+    id: serial("id").primaryKey(),
+    /** Tài khoản AD người gửi, viết thường, không kèm domain (lấy ở server) */
+    senderAccount: text("sender_account").notNull(),
+    /** Nội dung góp ý (1–5000 ký tự) */
+    content: text("content").notNull(),
+    /** NEW / IN_PROGRESS / DONE / REJECTED */
+    status: text("status").$type<FeedbackStatus>().notNull().default("NEW"),
+    /** Dev-admin cập nhật trạng thái gần nhất */
+    handledBy: text("handled_by"),
+    /** Lúc cập nhật trạng thái gần nhất */
+    handledAt: tstz("handled_at"),
+    /** Lúc gửi */
+    createdAt: tstz("created_at").notNull().defaultNow(),
+    /** Lúc sửa gần nhất (cập nhật ở code) */
+    updatedAt: tstz("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
+  },
+  (t) => [
+    index("feedback_created_idx").on(t.createdAt.desc(), t.id.desc()),
+    index("feedback_sender_idx").on(t.senderAccount, t.createdAt),
+    check("feedback_content_len", sql`char_length(${t.content}) BETWEEN 1 AND 5000`),
+    check("feedback_status_check", sql`${t.status} IN ('NEW', 'IN_PROGRESS', 'DONE', 'REJECTED')`),
+    check("feedback_handled_pair", sql`(${t.handledBy} IS NULL) = (${t.handledAt} IS NULL)`),
+  ],
+);
+
+export type FeedbackRow = typeof feedback.$inferSelect;

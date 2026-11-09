@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Mẫu web.config cho site IIS của Việc cần xử lý (inbox). deploy/install.ps1 điền __PORT__ rồi ghi ra <thư mục cài>\iis\web.config.
+  IIS (Windows Authentication) xác thực người dùng, rồi chuyển yêu cầu sang Node ở 127.0.0.1:__PORT__ kèm header:
+    x-remote-user = {LOGON_USER} (DOMAIN\tài-khoản)
+  Không có mã bí mật kèm theo — ứng dụng (middleware.ts) tin trực tiếp header này vì Node chỉ nghe loopback.
+  Điều kiện ở mức máy chủ IIS (install.ps1 đã cấu hình): ARR proxy bật, server variable HTTP_X_REMOTE_USER được phép
+  (allowedServerVariables), site tắt Anonymous và bật Windows Authentication.
+
+  Khác với kho: đường dẫn /inbox/api/v1 là API máy gọi máy (hệ thống nguồn như kho gọi bằng mã Bearer, KHÔNG có người dùng Windows)
+  nên phải cho Anonymous riêng đường dẫn đó. Việc này KHÔNG đặt trong file này mà đặt ở applicationHost.config bằng
+  Set-WebConfigurationProperty -Location "<site>/inbox/api/v1" (deploy/install.ps1, bước 8): thẻ <location> trong web.config của site
+  chỉ có hiệu lực khi mục authentication được mở khóa (overrideModeDefault=Allow), mặc định bị khóa. Rule rewrite bên dưới áp dụng cho
+  cả đường dẫn đó: với yêu cầu ẩn danh {LOGON_USER} rỗng nên header x-remote-user rỗng (đồng thời ghi đè header do client tự gửi);
+  ứng dụng bỏ qua danh tính Windows ở /api/v1 và chỉ dùng mã Bearer (middleware.ts).
+-->
+<configuration>
+  <system.webServer>
+    <security>
+      <requestFiltering>
+        <!-- 1 MB: thân yêu cầu tối đa của API là 256 KB (lib/api.ts BODY_MAX_BYTES), chừa dư cho header/mã hóa -->
+        <requestLimits maxAllowedContentLength="1048576" />
+      </requestFiltering>
+    </security>
+    <rewrite>
+      <rules>
+        <rule name="InboxProxy" stopProcessing="true">
+          <match url="(.*)" />
+          <serverVariables>
+            <set name="HTTP_X_REMOTE_USER" value="{LOGON_USER}" />
+          </serverVariables>
+          <action type="Rewrite" url="http://127.0.0.1:__PORT__/{R:1}" />
+        </rule>
+      </rules>
+    </rewrite>
+  </system.webServer>
+</configuration>

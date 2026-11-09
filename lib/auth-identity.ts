@@ -5,43 +5,27 @@ import { createHash, timingSafeEqual } from "node:crypto";
  * nên không import next/headers.
  *
  * Nguồn tài khoản:
- *  - sso  : chạy bằng server.js (SSO_ENABLED=1). server.js xác thực Windows rồi đặt header x-windows-user
- *           = DOMAIN\account (header do client gửi bị xóa trước). Domain phải đúng AUTH_AD_DOMAIN.
- *  - iis  : SSO_PROXY=1 — IIS đứng trước (Windows Authentication) rồi chuyển request sang server.js (SSO_MODE=iis, nghe ở 127.0.0.1).
- *           IIS đặt header x-windows-user = DOMAIN\account và x-inbox-proxy-secret = SSO_PROXY_SECRET (mã bí mật dùng chung).
- *           Chỉ tin x-windows-user khi mã bí mật khớp (so sánh thời gian không đổi); sai / thiếu mã = chưa đăng nhập.
- *           Phần còn lại giống sso (domain phải đúng AUTH_AD_DOMAIN).
+ *  - iis  : mặc định khi NODE_ENV=production (và không bật ALLOW_USER_SWITCH / AUTH_TEST_LOGIN). IIS đứng trước (Windows Authentication,
+ *           URL Rewrite/ARR) rồi chuyển request sang Node ở 127.0.0.1 kèm header x-remote-user = DOMAIN\account ({LOGON_USER}).
+ *           Header được tin trực tiếp, KHÔNG có mã bí mật đi kèm (cùng cơ chế với hệ thống kho): an toàn chỉ dựa vào việc Node
+ *           chỉ nghe loopback (127.0.0.1) nên không ai ngoài IIS trên cùng máy gọi tới được. Domain phải đúng AUTH_AD_DOMAIN.
  *  - test : AUTH_TEST_LOGIN=1 — môi trường test khi chưa có domain thật, mô phỏng SSO khi trình duyệt phải hỏi tài khoản:
  *           middleware trả 401 + WWW-Authenticate → trình duyệt hiện hộp thoại đăng nhập hệ thống; người dùng nhập tài khoản
  *           domain giả định (DOMAIN\account) + password dùng chung TEST_LOGIN_CODE; trình duyệt gửi lại header Authorization
- *           ở mọi request. Sau đó xử lý y như SSO. Không được bật cùng SSO thật.
+ *           ở mọi request. Sau đó xử lý như iis. Chỉ do scripts/test-login.mjs đặt; KHÔNG đặt trong .env của máy chủ thật.
  *  - dev  : `npm run dev` hoặc ALLOW_USER_SWITCH=1 — đọc cookie của bộ chọn "Người dùng thử" ở sidebar.
- *  - none : còn lại (VD `next start` không qua server.js ở production) → từ chối mọi request.
  */
 export const USER_COOKIE = "inbox_user";
 const DEV_DEFAULT_ACCOUNT = process.env.DEV_ACCOUNT?.trim().toLowerCase() || "le.vanphuc";
-const WINDOWS_USER_HEADER = "x-windows-user";
-/** Header IIS gắn kèm để chứng minh x-windows-user do chính IIS đặt (giá trị = SSO_PROXY_SECRET) */
-export const PROXY_SECRET_HEADER = "x-inbox-proxy-secret";
-/** Độ dài tối thiểu của SSO_PROXY_SECRET (đoán mò không khả thi) */
-export const PROXY_SECRET_MIN_LENGTH = 32;
-/** Độ dài tối đa của header mã bí mật được xử lý (chặn chuỗi rác quá dài) */
-const PROXY_SECRET_HEADER_MAX = 256;
+/** Header do IIS đặt = {LOGON_USER} (DOMAIN\account); IIS ghi đè giá trị client tự gửi */
+const REMOTE_USER_HEADER = "x-remote-user";
 
-export type AuthProvider = "sso" | "iis" | "test" | "dev" | "none";
+export type AuthProvider = "iis" | "test" | "dev";
 
 export function getAuthProvider(): AuthProvider {
-  const sso = process.env.SSO_ENABLED === "1";
-  const iis = process.env.SSO_PROXY === "1";
-  const test = process.env.AUTH_TEST_LOGIN === "1";
-  // Đăng nhập giả định cùng máy chủ SSO thật = cửa sau giả danh → dừng hẳn thay vì chọn một bên
-  if (test && (sso || iis)) throw new Error("AUTH_TEST_LOGIN=1 không được bật cùng SSO thật (server.js: SSPI hoặc IIS). Bỏ AUTH_TEST_LOGIN khỏi môi trường.");
-  if (sso && iis) throw new Error("SSO_ENABLED=1 (SSPI) và SSO_PROXY=1 (IIS) không được bật cùng lúc. Chọn một chế độ bằng SSO_MODE trong .env.");
-  if (sso) return "sso";
-  if (iis) return "iis";
-  if (test) return "test";
+  if (process.env.AUTH_TEST_LOGIN === "1") return "test";
   if (process.env.NODE_ENV !== "production" || process.env.ALLOW_USER_SWITCH === "1") return "dev";
-  return "none";
+  return "iis";
 }
 
 /** Header trình duyệt gửi lại sau khi người dùng nhập vào hộp thoại đăng nhập (HTTP Basic) */
@@ -105,48 +89,30 @@ export type RequestIdentitySource = {
 };
 
 /**
- * Tài khoản Windows do IIS xác thực: chỉ tin header x-windows-user khi header x-inbox-proxy-secret khớp SSO_PROXY_SECRET.
- * Cấu hình thiếu / quá ngắn = lỗi (không bao giờ tin header khi chưa có mã bí mật đủ mạnh).
- */
-function iisAccount(src: RequestIdentitySource): string | null {
-  const secret = process.env.SSO_PROXY_SECRET;
-  if (!secret || secret.length < PROXY_SECRET_MIN_LENGTH) {
-    throw new Error(`SSO_PROXY=1 cần SSO_PROXY_SECRET dài ít nhất ${PROXY_SECRET_MIN_LENGTH} ký tự (mã bí mật dùng chung với IIS)`);
-  }
-  const given = src.header(PROXY_SECRET_HEADER);
-  if (!given || given.length > PROXY_SECRET_HEADER_MAX || !samePassword(given, secret)) return null;
-  return src.header(WINDOWS_USER_HEADER);
-}
-
-/**
- * Tài khoản Windows thô (DOMAIN\account): SSO = header do server.js gửi; iis = header do IIS gửi kèm mã bí mật;
- * test = tên đăng nhập trong hộp thoại (password đúng). null nếu không chạy SSO / IIS / test hoặc chưa đăng nhập.
+ * Tài khoản Windows thô (DOMAIN\account): iis = header x-remote-user do IIS đặt; test = tên đăng nhập trong hộp thoại (password đúng).
+ * null nếu chưa đăng nhập hoặc đang ở chế độ dev.
  */
 export function windowsAccount(src: RequestIdentitySource): string | null {
   const provider = getAuthProvider();
-  if (provider === "sso") return src.header(WINDOWS_USER_HEADER);
-  if (provider === "iis") return iisAccount(src);
+  if (provider === "iis") return src.header(REMOTE_USER_HEADER);
   if (provider === "test") return basicAuthAccount(src.header(AUTHORIZATION_HEADER));
   return null;
 }
 
 /** Tài khoản (không kèm domain) của request; null nếu không xác định được */
 export function resolveAccount(src: RequestIdentitySource): string | null {
-  const provider = getAuthProvider();
-  if (provider === "dev") return src.cookie(USER_COOKIE) || DEV_DEFAULT_ACCOUNT;
-  if (provider === "none") return null;
+  if (getAuthProvider() === "dev") return src.cookie(USER_COOKIE) || DEV_DEFAULT_ACCOUNT;
 
-  // sso / iis / test: cùng quy tắc domain như máy chủ thật
+  // iis / test: cùng quy tắc domain như máy chủ thật
   const domain = process.env.AUTH_AD_DOMAIN;
-  if (!domain) throw new Error("Chưa cấu hình AUTH_AD_DOMAIN (bắt buộc khi chạy SSO bằng server.js (SSPI / IIS) hoặc đăng nhập thử)");
+  if (!domain) throw new Error("Chưa cấu hình AUTH_AD_DOMAIN (bắt buộc khi chạy sau IIS hoặc đăng nhập thử)");
   const raw = windowsAccount(src);
   return raw ? normalizeDomainAccount(raw, domain) : null;
 }
 
-/** Tài khoản để hiển thị: FIVESTAR\fs-quoc-trong khi chạy SSO (SSPI / IIS) / đăng nhập thử, ngược lại chỉ tên tài khoản */
+/** Tài khoản để hiển thị: FIVESTAR\fs-quoc-trong khi chạy sau IIS / đăng nhập thử, ngược lại chỉ tên tài khoản */
 export function displayAccount(account: string): string {
   const domain = process.env.AUTH_AD_DOMAIN;
-  const provider = getAuthProvider();
-  return (provider === "sso" || provider === "iis" || provider === "test") && domain ? `${domain.toUpperCase()}\\${account}` : account;
+  return getAuthProvider() !== "dev" && domain ? `${domain.toUpperCase()}\\${account}` : account;
 }
 

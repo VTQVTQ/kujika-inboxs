@@ -398,3 +398,20 @@ html:lang(ja) .tbl .pill { width: auto; }
 }
 .stamp[data-status="RETURNED"] .seal { --seal: #c62828; font-size: 14px; }
 .paper-arrow::before { content: "\25B8"; }
+
+/* ---------- Hòm thư góp ý (/gop-y, /gop-y/xem) ---------- */
+.feedback-card { max-width: 760px; padding: 0; }
+.feedback-card .tbl { min-width: 0; }
+.feedback-title { font-size: 20px; font-weight: 600; }
+.feedback-card > .feedback-title { padding: 20px 20px 12px; }
+.feedback-form { display: grid; gap: 8px; padding: 20px; }
+.feedback-form .field-label { margin-top: 0; }
+.feedback-textarea { min-height: 200px; }
+.feedback-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.feedback-count { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+/* Giữ sẵn một dòng cho thông báo lỗi để form không giật khi lỗi hiện / mất */
+.feedback-error { min-height: 1.5em; }
+/* Màn Xem góp ý: dòng thấp hơn mặc định (nội dung ngắn); nội dung dài thì dòng cao lên, khung bảng cuộn */
+.card.feedback-list, .card.feedback-card { --row-h: 64px; }
+.feedback-content { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 70ch; }
+.feedback-handled-at { display: block; }

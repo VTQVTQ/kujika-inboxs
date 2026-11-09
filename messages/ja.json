@@ -147,5 +147,58 @@
   "denied": {
     "title": "アクセス権限がありません",
     "message": "アカウントを確認できませんでした。会社のドメインアカウントでサインインしてから、もう一度お試しください。"
+  },
+  "feedback": {
+    "meta": {
+      "send": "ご意見・ご要望",
+      "view": "ご意見の確認",
+      "mine": "自分のご意見"
+    },
+    "form": {
+      "title": "ご意見・ご要望",
+      "label": "ご意見の内容",
+      "counter": "{count} / {max} 文字",
+      "submit": "送信",
+      "sent": "ご意見を送信しました。ありがとうございます",
+      "errorEmpty": "ご意見の内容を入力してください。",
+      "errorTooLong": "ご意見は{max}文字以内で入力してください。",
+      "errorRateLimited": "24時間以内に送信できるご意見は{limit}件までです。しばらくしてからお試しください。",
+      "errorGeneric": "送信できませんでした。もう一度お試しください。"
+    },
+    "view": {
+      "title": "ユーザーからのご意見",
+      "filterLabel": "状況で絞り込み",
+      "filterAll": "すべて",
+      "status": {
+        "NEW": "新規",
+        "IN_PROGRESS": "対応中",
+        "DONE": "完了",
+        "REJECTED": "対応しない"
+      },
+      "colSent": "送信日時",
+      "colSender": "送信者",
+      "colContent": "内容",
+      "colStatus": "状況",
+      "colHandled": "対応者 / 対応日時",
+      "statusLabel": "ご意見の状況",
+      "handledNone": "なし",
+      "statusUpdated": "状況を更新しました",
+      "errorGeneric": "状況を更新できませんでした。もう一度お試しください。",
+      "errorNotFound": "該当するご意見が見つかりません。",
+      "empty": "ご意見はまだありません",
+      "emptyFiltered": "この状況のご意見はありません",
+      "errorTitle": "ご意見の一覧を読み込めませんでした",
+      "retry": "再試行"
+    },
+    "tabs": {
+      "label": "ご意見箱",
+      "send": "意見を送る",
+      "mine": "自分のご意見"
+    },
+    "mine": {
+      "colSent": "送信日",
+      "colContent": "内容",
+      "empty": "送信したご意見はまだありません"
+    }
   }
 }

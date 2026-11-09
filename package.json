@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
-    "start": "node server.js",
+    "postbuild": "node scripts/post-build.mjs",
+    "start": "node scripts/start-standalone.mjs",
     "dev:test": "node scripts/test-login.mjs dev",
     "start:test": "node scripts/test-login.mjs start",
     "lint": "eslint .",
@@ -17,10 +18,8 @@
   "dependencies": {
     "dotenv": "^18.0.9",
     "drizzle-orm": "^0.45.3",
-    "express": "^5.2.1",
     "next": "15.5.4",
     "next-intl": "4.4.0",
-    "node-expose-sspi": "^0.1.60",
     "pg": "^8.23.1",
     "react": "19.1.1",
     "react-dom": "19.1.1",

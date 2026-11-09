@@ -1,7 +1,7 @@
 # API công khai của Việc cần xử lý
 
 Tài liệu cho nhóm phát triển các hệ thống muốn đưa việc duyệt của mình vào trang `/viec-can-xu-ly`.
-Mọi đường dẫn bắt đầu bằng `/api/v1`. Dữ liệu là JSON UTF-8 (`Content-Type: application/json; charset=utf-8`).
+Mọi đường dẫn bắt đầu bằng `/api/v1`, **đặt sau tiền tố của ứng dụng** (`basePath` = `/inbox`, xem `lib/base-path.ts`): địa chỉ thật là `https://<máy chủ>/inbox/api/v1/...`. Các ví dụ bên dưới viết rút gọn, không kèm `/inbox`. Dữ liệu là JSON UTF-8 (`Content-Type: application/json; charset=utf-8`).
 
 ## 1. Hộp việc là gì
 
@@ -236,7 +236,7 @@ Phản hồi (JSON):
 
 ### 7.3 Triển khai
 
-- Chỉ mở đường dẫn này trong mạng nội bộ cho máy chủ hộp việc. Đây là cuộc gọi giữa hai máy chủ nên **không có người dùng Windows**: nếu hệ thống nguồn bắt SSO cho mọi đường dẫn (SSPI / IIS Windows Authentication), phải để ngỏ riêng `POST /api/inbox/act` (chữ ký thay cho SSO). Với `server.js` SSPI: đăng ký route trước `sso.auth()` (kho đã làm). Với IIS: cho phép Anonymous riêng đường dẫn này.
+- Chỉ mở đường dẫn này trong mạng nội bộ cho máy chủ hộp việc. Đây là cuộc gọi giữa hai máy chủ nên **không có người dùng Windows**: nếu hệ thống nguồn bắt Windows Authentication cho mọi đường dẫn ở IIS, phải để ngỏ riêng `POST /api/inbox/act` (chữ ký thay cho đăng nhập Windows): cho phép Anonymous riêng đường dẫn này ở IIS (kể cả khi hệ thống nguồn có `basePath`, ví dụ kho là `/storage/api/inbox/act`). Ở phía ứng dụng, middleware của hệ thống nguồn cũng phải bỏ qua đường dẫn này.
 - Hệ thống nào chưa có API này giữ `inlineAct = false`: người dùng vẫn dùng **Mở ở hệ thống gốc**.
 - Hộp việc ghi audit (file) mỗi lần bấm: `item.approve` / `item.return`, `actor` = `user:<tài khoản>`.
 - Rủi ro cần chấp nhận: ai nắm `INBOX_SIGNING_KEY` hoặc bí mật của một hệ thống có thể xử lý thay người khác trong phạm vi các việc đang chờ người đó ở hệ thống ấy. Giữ các khóa này như mật khẩu quản trị.

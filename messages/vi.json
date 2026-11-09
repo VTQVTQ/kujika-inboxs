@@ -147,5 +147,58 @@
   "denied": {
     "title": "Không có quyền truy cập",
     "message": "Không xác định được tài khoản của bạn. Hãy đăng nhập bằng tài khoản domain của công ty rồi thử lại."
+  },
+  "feedback": {
+    "meta": {
+      "send": "Ý kiến & góp ý",
+      "view": "Xem góp ý",
+      "mine": "Góp ý của tôi"
+    },
+    "form": {
+      "title": "Ý kiến & góp ý",
+      "label": "Nội dung góp ý",
+      "counter": "{count} / {max} ký tự",
+      "submit": "Gửi",
+      "sent": "Đã gửi góp ý, cảm ơn bạn",
+      "errorEmpty": "Vui lòng nhập nội dung góp ý.",
+      "errorTooLong": "Nội dung góp ý tối đa {max} ký tự.",
+      "errorRateLimited": "Bạn đã gửi tối đa {limit} góp ý trong 24 giờ. Vui lòng thử lại sau.",
+      "errorGeneric": "Không gửi được góp ý. Vui lòng thử lại."
+    },
+    "view": {
+      "title": "Góp ý của người dùng",
+      "filterLabel": "Lọc theo trạng thái",
+      "filterAll": "Tất cả",
+      "status": {
+        "NEW": "Mới",
+        "IN_PROGRESS": "Đang xử lý",
+        "DONE": "Đã xong",
+        "REJECTED": "Không xử lý"
+      },
+      "colSent": "Thời gian gửi",
+      "colSender": "Người gửi",
+      "colContent": "Nội dung",
+      "colStatus": "Trạng thái",
+      "colHandled": "Người xử lý / lúc xử lý",
+      "statusLabel": "Trạng thái góp ý",
+      "handledNone": "Chưa có",
+      "statusUpdated": "Đã cập nhật trạng thái",
+      "errorGeneric": "Không cập nhật được trạng thái. Vui lòng thử lại.",
+      "errorNotFound": "Không tìm thấy góp ý này.",
+      "empty": "Chưa có góp ý nào",
+      "emptyFiltered": "Không có góp ý nào ở trạng thái này",
+      "errorTitle": "Không tải được danh sách góp ý",
+      "retry": "Thử lại"
+    },
+    "tabs": {
+      "label": "Hòm thư góp ý",
+      "send": "Gửi góp ý",
+      "mine": "Góp ý của tôi"
+    },
+    "mine": {
+      "colSent": "Ngày gửi",
+      "colContent": "Nội dung",
+      "empty": "Bạn chưa gửi góp ý nào"
+    }
   }
 }
