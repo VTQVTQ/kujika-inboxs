@@ -2,11 +2,28 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { updateFeedbackStatusAction } from "@/lib/feedback-actions";
-import { useToast } from "./Toast";
 
-/** Ô đổi trạng thái của một góp ý (màn Xem góp ý, chỉ dev-admin). Server kiểm tra lại quyền; lỗi thì trả về giá trị cũ */
-export default function FeedbackStatusSelect({ id, status, options, label }: { id: number; status: string; options: { value: string; label: string }[]; label: string }) {
-  const toast = useToast();
+export type FeedbackNotice = { kind: "ok" | "error"; text: string };
+
+/**
+ * Ô đổi trạng thái của một góp ý (tab Xem góp ý, chỉ dev-admin). Server kiểm tra lại quyền; lỗi thì trả về giá trị cũ.
+ * Kết quả báo qua onNotice (hộp thoại tự hiện ngay trong khung vì toast nằm dưới lớp modal).
+ */
+export default function FeedbackStatusSelect({
+  id,
+  status,
+  options,
+  label,
+  onNotice,
+  onSaved,
+}: {
+  id: number;
+  status: string;
+  options: { value: string; label: string }[];
+  label: string;
+  onNotice: (notice: FeedbackNotice) => void;
+  onSaved: () => void;
+}) {
   const [value, setValue] = useState(status);
   const [pending, startTransition] = useTransition();
   // Danh sách tải lại từ server (lọc, đổi trang, vừa lưu) → hiện đúng giá trị đang lưu
@@ -18,10 +35,11 @@ export default function FeedbackStatusSelect({ id, status, options, label }: { i
     startTransition(async () => {
       const result = await updateFeedbackStatusAction(id, next);
       if (result.ok) {
-        toast({ kind: "ok", text: result.message });
+        onNotice({ kind: "ok", text: result.message });
+        onSaved();
       } else {
         setValue(previous);
-        toast({ kind: "error", text: result.error });
+        onNotice({ kind: "error", text: result.error });
       }
     });
   };

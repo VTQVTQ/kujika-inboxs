@@ -1,100 +1,76 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { type FormEvent, useId, useState, useTransition } from "react";
+import { type FormEvent, useEffect, useId, useState, useTransition } from "react";
 import { sendFeedbackAction } from "@/lib/feedback-actions";
-import { useToast } from "./Toast";
 
-/** Form gửi góp ý: một ô nội dung + nút Gửi. Người gửi do server xác định, form chỉ gửi nội dung */
-export default function FeedbackForm({ max }: { max: number }) {
+type Notice = { kind: "ok" | "error"; text: string } | null;
+
+/**
+ * Form gửi góp ý: một ô nhập (nhãn dạng legend) + bộ đếm ký tự. Nút Hủy / Gửi nằm ở chân hộp thoại (nút Gửi gắn vào form qua thuộc tính `form`),
+ * nên form báo lên trạng thái đang gửi (onPendingChange) và nội dung đang trống (onEmptyChange) để khóa nút. Server vẫn kiểm tra nội dung trống.
+ * Kết quả hiện ngay dưới form (nằm trong hộp thoại nên không dùng toast).
+ */
+export default function FeedbackForm({
+  max,
+  formId,
+  onPendingChange,
+  onEmptyChange,
+}: {
+  max: number;
+  formId: string;
+  onPendingChange: (pending: boolean) => void;
+  onEmptyChange: (empty: boolean) => void;
+}) {
   const t = useTranslations("feedback.form");
-  const toast = useToast();
+  const id = useId();
+  const countId = `${id}-count`;
+  const noticeId = `${id}-notice`;
   const [content, setContent] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<Notice>(null);
   const [pending, startTransition] = useTransition();
+  const error = notice?.kind === "error";
+  const empty = content.trim() === "";
+
+  useEffect(() => onPendingChange(pending), [pending, onPendingChange]);
+  useEffect(() => onEmptyChange(empty), [empty, onEmptyChange]);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setNotice(null);
     startTransition(async () => {
       const result = await sendFeedbackAction(content);
       if (result.ok) {
         setContent("");
-        toast({ kind: "ok", text: result.message });
+        setNotice({ kind: "ok", text: result.message });
       } else {
-        setError(result.error);
+        setNotice({ kind: "error", text: result.error });
       }
     });
   };
 
   return (
-    <FeedbackFormView
-      value={content}
-      max={max}
-      error={error}
-      pending={pending}
-      disabled={false}
-      onChange={(v) => {
-        setContent(v);
-        setError(null);
-      }}
-      onSubmit={submit}
-      sendLabel={t("submit")}
-    />
-  );
-}
-
-/** Khung chờ (loading.tsx): cùng bố cục / chiều cao với form thật, ô nhập và nút bị khóa */
-export function FeedbackFormSkeleton({ max }: { max: number }) {
-  const t = useTranslations("feedback.form");
-  return <FeedbackFormView value="" max={max} error={null} pending={false} disabled sendLabel={t("submit")} />;
-}
-
-function FeedbackFormView({
-  value,
-  max,
-  error,
-  pending,
-  disabled,
-  onChange,
-  onSubmit,
-  sendLabel,
-}: {
-  value: string;
-  max: number;
-  error: string | null;
-  pending: boolean;
-  disabled: boolean;
-  onChange?: (v: string) => void;
-  onSubmit?: (e: FormEvent) => void;
-  sendLabel: string;
-}) {
-  const t = useTranslations("feedback.form");
-  const id = useId();
-  const countId = `${id}-count`;
-  const errorId = `${id}-error`;
-  return (
-    <form onSubmit={onSubmit} className="feedback-form" aria-busy={disabled || pending || undefined}>
-      <label className="field-label" htmlFor={id}>{t("label")}</label>
-      <textarea
-        id={id}
-        className="textarea feedback-textarea"
-        value={value}
-        maxLength={max}
-        required
-        disabled={disabled || pending}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${countId} ${errorId}` : countId}
-        onChange={(e) => onChange?.(e.target.value)}
-      />
-      <div className="feedback-foot">
-        <span id={countId} className="feedback-count">{t("counter", { count: [...value].length, max })}</span>
-        <button type="submit" className="btn btn-primary" disabled={disabled || pending || value.trim() === ""} aria-busy={pending}>
-          {sendLabel}
-        </button>
-      </div>
-      {/* Chỗ báo lỗi giữ sẵn một dòng cao (CSS) để form không giật khi lỗi hiện / mất */}
-      <p id={errorId} className="form-error feedback-error" role="alert">{error}</p>
+    <form id={formId} onSubmit={submit} noValidate className="feedback-form" aria-busy={pending || undefined}>
+      <fieldset className="feedback-field" data-invalid={error ? true : undefined}>
+        <legend id={`${id}-legend`}>{t("label")}</legend>
+        <textarea
+          id={id}
+          className="feedback-textarea"
+          value={content}
+          maxLength={max}
+          disabled={pending}
+          aria-labelledby={`${id}-legend`}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${countId} ${noticeId}` : countId}
+          onChange={(e) => {
+            setContent(e.target.value);
+            setNotice(null);
+          }}
+        />
+        <span id={countId} className="feedback-count">{t("counter", { count: [...content].length, max })}</span>
+      </fieldset>
+      {/* Chỗ báo kết quả giữ sẵn một dòng cao (CSS) để hộp thoại không giật khi hiện / mất */}
+      <p id={noticeId} className={`feedback-notice ${notice?.kind === "ok" ? "feedback-ok" : "form-error"}`} role={error ? "alert" : "status"}>{notice?.text}</p>
     </form>
   );
 }

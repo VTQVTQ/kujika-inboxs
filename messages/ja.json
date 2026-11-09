@@ -14,6 +14,9 @@
     "loading": "読み込み中…",
     "closeToast": "通知を閉じる"
   },
+  "userMenu": {
+    "label": "オプション"
+  },
   "roles": {
     "CONFIRM": "確認",
     "DECIDE": "承認"
@@ -149,16 +152,12 @@
     "message": "アカウントを確認できませんでした。会社のドメインアカウントでサインインしてから、もう一度お試しください。"
   },
   "feedback": {
-    "meta": {
-      "send": "ご意見・ご要望",
-      "view": "ご意見の確認",
-      "mine": "自分のご意見"
-    },
     "form": {
       "title": "ご意見・ご要望",
-      "label": "ご意見の内容",
+      "label": "ご意見・ご要望をご入力ください",
       "counter": "{count} / {max} 文字",
       "submit": "送信",
+      "cancel": "キャンセル",
       "sent": "ご意見を送信しました。ありがとうございます",
       "errorEmpty": "ご意見の内容を入力してください。",
       "errorTooLong": "ご意見は{max}文字以内で入力してください。",
@@ -166,7 +165,6 @@
       "errorGeneric": "送信できませんでした。もう一度お試しください。"
     },
     "view": {
-      "title": "ユーザーからのご意見",
       "filterLabel": "状況で絞り込み",
       "filterAll": "すべて",
       "status": {
@@ -187,18 +185,26 @@
       "errorNotFound": "該当するご意見が見つかりません。",
       "empty": "ご意見はまだありません",
       "emptyFiltered": "この状況のご意見はありません",
-      "errorTitle": "ご意見の一覧を読み込めませんでした",
+      "errorLoad": "ご意見の一覧を読み込めませんでした。",
       "retry": "再試行"
     },
     "tabs": {
       "label": "ご意見箱",
       "send": "意見を送る",
-      "mine": "自分のご意見"
+      "mine": "自分のご意見",
+      "all": "ご意見の確認"
     },
     "mine": {
       "colSent": "送信日",
       "colContent": "内容",
-      "empty": "送信したご意見はまだありません"
+      "empty": "送信したご意見はまだありません",
+      "errorLoad": "ご意見の一覧を読み込めませんでした。",
+      "retry": "再試行"
+    },
+    "pager": {
+      "pageOf": "{page} / {count} ページ",
+      "prev": "前へ",
+      "next": "次へ"
     }
   }
 }

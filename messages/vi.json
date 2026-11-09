@@ -14,6 +14,9 @@
     "loading": "Đang tải…",
     "closeToast": "Đóng thông báo"
   },
+  "userMenu": {
+    "label": "Tùy chọn"
+  },
   "roles": {
     "CONFIRM": "Xác nhận",
     "DECIDE": "Phê duyệt"
@@ -149,16 +152,12 @@
     "message": "Không xác định được tài khoản của bạn. Hãy đăng nhập bằng tài khoản domain của công ty rồi thử lại."
   },
   "feedback": {
-    "meta": {
-      "send": "Ý kiến & góp ý",
-      "view": "Xem góp ý",
-      "mine": "Góp ý của tôi"
-    },
     "form": {
       "title": "Ý kiến & góp ý",
-      "label": "Nội dung góp ý",
+      "label": "Nhập ý kiến, góp ý của bạn",
       "counter": "{count} / {max} ký tự",
       "submit": "Gửi",
+      "cancel": "Hủy",
       "sent": "Đã gửi góp ý, cảm ơn bạn",
       "errorEmpty": "Vui lòng nhập nội dung góp ý.",
       "errorTooLong": "Nội dung góp ý tối đa {max} ký tự.",
@@ -166,7 +165,6 @@
       "errorGeneric": "Không gửi được góp ý. Vui lòng thử lại."
     },
     "view": {
-      "title": "Góp ý của người dùng",
       "filterLabel": "Lọc theo trạng thái",
       "filterAll": "Tất cả",
       "status": {
@@ -187,18 +185,26 @@
       "errorNotFound": "Không tìm thấy góp ý này.",
       "empty": "Chưa có góp ý nào",
       "emptyFiltered": "Không có góp ý nào ở trạng thái này",
-      "errorTitle": "Không tải được danh sách góp ý",
+      "errorLoad": "Không tải được danh sách góp ý.",
       "retry": "Thử lại"
     },
     "tabs": {
       "label": "Hòm thư góp ý",
       "send": "Gửi góp ý",
-      "mine": "Góp ý của tôi"
+      "mine": "Góp ý của tôi",
+      "all": "Xem góp ý"
     },
     "mine": {
       "colSent": "Ngày gửi",
       "colContent": "Nội dung",
-      "empty": "Bạn chưa gửi góp ý nào"
+      "empty": "Bạn chưa gửi góp ý nào",
+      "errorLoad": "Không tải được danh sách góp ý.",
+      "retry": "Thử lại"
+    },
+    "pager": {
+      "pageOf": "Trang {page} / {count}",
+      "prev": "Trước",
+      "next": "Sau"
     }
   }
 }

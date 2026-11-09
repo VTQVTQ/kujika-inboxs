@@ -1,10 +1,11 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import DevUserSwitcher from "@/components/DevUserSwitcher";
-import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { ToastProvider } from "@/components/Toast";
+import UserMenu from "@/components/UserMenu";
 import { isLocale } from "@/i18n/config";
 import { getCurrentUser } from "@/lib/auth";
 import { getAuthProvider } from "@/lib/auth-identity";
+import { FEEDBACK_MAX, isFeedbackAdmin } from "@/lib/feedback";
 
 export const dynamic = "force-dynamic";
 
@@ -16,8 +17,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <span className="brand">{t("appTitle")}</span>
         <div className="topbar-end">
           {getAuthProvider() === "dev" && <DevUserSwitcher account={user.account} />}
-          {isLocale(locale) && <LocaleSwitcher locale={locale} />}
           <span className="user-chip">{user.display}</span>
+          {isLocale(locale) && <UserMenu max={FEEDBACK_MAX} isFeedbackAdmin={isFeedbackAdmin(user.account)} locale={locale} />}
         </div>
       </header>
       <ToastProvider>
