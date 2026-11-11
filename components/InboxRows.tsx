@@ -4,7 +4,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { COLUMNS } from "@/app/(app)/viec-can-xu-ly/columns";
-import { isLocale } from "@/i18n/config";
 import { fmtDate, fmtNum } from "@/lib/format";
 import type { InboxRow } from "@/lib/store";
 import ActDialog from "./ActDialog";
@@ -16,8 +15,7 @@ const norm = (s: string) => s.normalize("NFC").toLocaleLowerCase();
 /** Thân bảng việc cần xử lý. Nhấp đúp vào dòng (hoặc nút Xem) mở hộp thoại xem nhanh; "Mở" đưa sang hệ thống gốc ở tab mới */
 export default function InboxRows({ rows }: { rows: InboxRow[] }) {
   const t = useTranslations();
-  const localeRaw = useLocale();
-  const locale = isLocale(localeRaw) ? localeRaw : "vi";
+  const locale = useLocale();
   const [viewing, setViewing] = useState<InboxRow | null>(null);
   const [acting, setActing] = useState<{ row: InboxRow; action: "approve" | "return" } | null>(null);
 

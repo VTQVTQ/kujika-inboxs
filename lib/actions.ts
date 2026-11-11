@@ -3,7 +3,6 @@
 import { getTranslations } from "next-intl/server";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { isLocale, LOCALE_COOKIE } from "@/i18n/config";
 import { z } from "zod";
 import { callSourceAct, fetchSourceTemplatePreview } from "@/lib/act";
 import { recordAudit } from "@/lib/audit";
@@ -13,13 +12,6 @@ import { findActionableItem, findExportableItem, getInboxDetail, type InboxDetai
 
 /** Tài khoản AD: chữ, số, ".", "_", "-" */
 const ACCOUNT_PATTERN = /^[a-z0-9._-]{1,100}$/;
-
-/** Đổi ngôn ngữ giao diện — lưu ở cookie của trình duyệt (1 năm) */
-export async function setLocaleAction(locale: string) {
-  if (!isLocale(locale)) return;
-  (await cookies()).set(LOCALE_COOKIE, locale, { path: "/", sameSite: "lax", maxAge: 60 * 60 * 24 * 365 });
-  revalidatePath("/", "layout");
-}
 
 /** Chỉ môi trường dev: chọn tài khoản thử (ở SSO / IIS / đăng nhập thử danh tính do hệ thống xác định, không đổi được) */
 export async function switchUserAction(account: string) {

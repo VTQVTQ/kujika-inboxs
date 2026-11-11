@@ -1,13 +1,11 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { isLocale } from "@/i18n/config";
 import { fmtNum } from "@/lib/format";
 import { PAGE_SIZES, type PageInfo } from "@/lib/table";
 
 /** Chân bảng: số dòng đang xem, chọn số dòng / trang, trang trước / sau (mọi trạng thái nằm trên URL) */
 export default async function Pager({ info, sizeHref, pageHref }: { info: PageInfo; sizeHref: (size: number) => string; pageHref: (page: number) => string }) {
-  const [t, localeRaw] = await Promise.all([getTranslations("inbox.pager"), getLocale()]);
-  const locale = isLocale(localeRaw) ? localeRaw : "vi";
+  const [t, locale] = await Promise.all([getTranslations("inbox.pager"), getLocale()]);
   const from = info.total === 0 ? 0 : info.offset + 1;
   const to = Math.min(info.offset + info.size, info.total);
   return (

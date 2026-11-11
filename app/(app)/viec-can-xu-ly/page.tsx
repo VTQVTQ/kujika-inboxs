@@ -8,7 +8,6 @@ import { InboxSelection, ResetSelection, SelectAllTh } from "@/components/InboxS
 import Pager from "@/components/Pager";
 import SortTh from "@/components/SortTh";
 import { PagerSkeleton, SkeletonRows } from "@/components/Skeleton";
-import { isLocale } from "@/i18n/config";
 import { getCurrentUser } from "@/lib/auth";
 import { INBOX_SORTS, type InboxSearch, type InboxTab, listActiveSystems, listInbox } from "@/lib/store";
 import { keepTableParams, parseTableQuery } from "@/lib/table";
@@ -25,8 +24,7 @@ const PATH = "/viec-can-xu-ly";
 
 export default async function InboxPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
-  const [user, t, localeRaw, systems] = await Promise.all([getCurrentUser(), getTranslations(), getLocale(), listActiveSystems()]);
-  const locale = isLocale(localeRaw) ? localeRaw : "vi";
+  const [user, t, locale, systems] = await Promise.all([getCurrentUser(), getTranslations(), getLocale(), listActiveSystems()]);
 
   const tab = TABS.find((x) => x === one(sp.tab)) ?? "todo";
   // Giá trị lạ trên URL → tất cả hệ thống

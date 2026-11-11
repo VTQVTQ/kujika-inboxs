@@ -2,7 +2,6 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { isLocale } from "@/i18n/config";
 import { getDetailAction } from "@/lib/actions";
 import { fmtDateTime, fmtNum, fmtStampDate } from "@/lib/format";
 import type { InboxDetail, InboxRow, RouteStep } from "@/lib/store";
@@ -14,8 +13,7 @@ import TemplatePreviewDialog from "./TemplatePreviewDialog";
  */
 export default function InboxViewDialog({ row, onClose, onAct }: { row: InboxRow; onClose: () => void; onAct: (action: "approve" | "return") => void }) {
   const t = useTranslations();
-  const localeRaw = useLocale();
-  const locale = isLocale(localeRaw) ? localeRaw : "vi";
+  const locale = useLocale();
   const ref = useRef<HTMLDialogElement>(null);
 
   const [detail, setDetail] = useState<InboxDetail | null>(null);

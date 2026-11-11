@@ -1,8 +1,8 @@
-import type messages from "../messages/vi.json";
+import type messages from "../messages/ja.json";
 import type { Locale } from "./config";
 
 // Key dịch được kiểm tra bằng TypeScript: gõ sai key → lỗi khi typecheck.
-// messages/vi.json là bản gốc; messages/ja.json phải có đủ các key giống hệt.
+// messages/ja.json là bản gốc (và duy nhất).
 declare module "next-intl" {
   interface AppConfig {
     Locale: Locale;

@@ -1,14 +1,10 @@
-import { cookies } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
-import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE, TIME_ZONE } from "./config";
+import ja from "../messages/ja.json";
+import { DEFAULT_LOCALE, TIME_ZONE } from "./config";
 
-/** next-intl không dùng ngôn ngữ trên URL: lấy từ cookie, mặc định tiếng Việt */
-export default getRequestConfig(async () => {
-  const value = (await cookies()).get(LOCALE_COOKIE)?.value;
-  const locale = isLocale(value) ? value : DEFAULT_LOCALE;
-  return {
-    locale,
-    timeZone: TIME_ZONE,
-    messages: (await import(`../messages/${locale}.json`)).default,
-  };
-});
+/** next-intl không dùng ngôn ngữ trên URL: chỉ có tiếng Nhật */
+export default getRequestConfig(async () => ({
+  locale: DEFAULT_LOCALE,
+  timeZone: TIME_ZONE,
+  messages: ja,
+}));

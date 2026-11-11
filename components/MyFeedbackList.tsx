@@ -2,7 +2,6 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { isLocale } from "@/i18n/config";
 import { listMyFeedbackAction, type MyFeedbackPage } from "@/lib/feedback-actions";
 import { fmtDateTime } from "@/lib/format";
 import FeedbackPager from "./FeedbackPager";
@@ -11,8 +10,7 @@ import FeedbackPager from "./FeedbackPager";
 export default function MyFeedbackList() {
   const t = useTranslations("feedback.mine");
   const tc = useTranslations("common");
-  const localeRaw = useLocale();
-  const locale = isLocale(localeRaw) ? localeRaw : "vi";
+  const locale = useLocale();
   const [page, setPage] = useState(1);
   const [reload, setReload] = useState(0);
   const [result, setResult] = useState<MyFeedbackPage | null>(null);

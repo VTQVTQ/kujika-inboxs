@@ -100,7 +100,8 @@ export default function FeedbackDialog({ max, isAdmin, onClose }: { max: number;
         </div>
       </div>
       <div id="feedback-panel" role="tabpanel" aria-labelledby={`feedback-tab-${tab}`} className="feedback-panel">
-        {tab === "send" && <FeedbackForm max={max} formId={formId} onPendingChange={onPendingChange} onEmptyChange={onEmptyChange} />}
+        {/* Form luôn nằm trong cây (chỉ ẩn khi sang tab khác) để nội dung đang gõ không bị mất khi chuyển tab */}
+        <FeedbackForm max={max} formId={formId} hidden={tab !== "send"} onPendingChange={onPendingChange} onEmptyChange={onEmptyChange} />
         {tab === "mine" && <MyFeedbackList />}
         {tab === "all" && <AllFeedbackList />}
       </div>

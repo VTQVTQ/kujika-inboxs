@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useToast } from "@/components/Toast";
-import { isLocale } from "@/i18n/config";
 import { actOnItemAction } from "@/lib/actions";
 import type { InboxRow } from "@/lib/store";
 
@@ -18,8 +17,7 @@ const COMMENT_MAX = 500;
 export default function ActDialog({ row, action, onClose }: { row: InboxRow; action: "approve" | "return"; onClose: () => void }) {
   const t = useTranslations();
   const router = useRouter();
-  const localeRaw = useLocale();
-  const locale = isLocale(localeRaw) ? localeRaw : "vi";
+  const locale = useLocale();
   const ref = useRef<HTMLDialogElement>(null);
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);

@@ -68,4 +68,4 @@ Mỗi yêu cầu tới `/api/v1` (kể cả bị từ chối hoặc lỗi) ghi m
 
 - Kho dữ liệu chỉ là bản sao: mất bảng `approval_inbox` thì hệ thống nguồn đối soát lại (kho tự gửi lại mọi đề nghị đang duyệt mỗi giờ).
 - Mã API và `INBOX_ADMIN_TOKEN` không được ghi vào log, nhật ký hay mã nguồn.
-- Giao diện có tiếng Việt (mặc định) và tiếng Nhật: `messages/vi.json` và `messages/ja.json` phải có cùng khóa; chữ trong JSX lấy từ `useTranslations` / `getTranslations` (ESLint `react/jsx-no-literals`).
+- Giao diện chỉ còn tiếng Nhật (`messages/ja.json`, không có nút đổi ngôn ngữ); chữ trong JSX lấy từ `useTranslations` / `getTranslations` (ESLint `react/jsx-no-literals`).

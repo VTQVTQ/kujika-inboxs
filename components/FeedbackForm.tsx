@@ -7,18 +7,21 @@ import { sendFeedbackAction } from "@/lib/feedback-actions";
 type Notice = { kind: "ok" | "error"; text: string } | null;
 
 /**
- * Form gửi góp ý: một ô nhập (nhãn dạng legend) + bộ đếm ký tự. Nút Hủy / Gửi nằm ở chân hộp thoại (nút Gửi gắn vào form qua thuộc tính `form`),
+ * Form gửi góp ý: một ô nhập (nhãn nổi: placeholder khi trống, thu nhỏ lên viền khi focus / có chữ) + bộ đếm ký tự. Nút Hủy / Gửi nằm ở chân hộp thoại (nút Gửi gắn vào form qua thuộc tính `form`),
  * nên form báo lên trạng thái đang gửi (onPendingChange) và nội dung đang trống (onEmptyChange) để khóa nút. Server vẫn kiểm tra nội dung trống.
  * Kết quả hiện ngay dưới form (nằm trong hộp thoại nên không dùng toast).
  */
 export default function FeedbackForm({
   max,
   formId,
+  hidden,
   onPendingChange,
   onEmptyChange,
 }: {
   max: number;
   formId: string;
+  /** Ẩn form (tab khác đang mở) nhưng giữ nguyên nội dung đang gõ */
+  hidden: boolean;
   onPendingChange: (pending: boolean) => void;
   onEmptyChange: (empty: boolean) => void;
 }) {
@@ -50,16 +53,14 @@ export default function FeedbackForm({
   };
 
   return (
-    <form id={formId} onSubmit={submit} noValidate className="feedback-form" aria-busy={pending || undefined}>
-      <fieldset className="feedback-field" data-invalid={error ? true : undefined}>
-        <legend id={`${id}-legend`}>{t("label")}</legend>
+    <form id={formId} onSubmit={submit} noValidate hidden={hidden} className="feedback-form" aria-busy={pending || undefined}>
+      <div className="feedback-field" data-invalid={error ? true : undefined} data-filled={empty ? undefined : true}>
         <textarea
           id={id}
           className="feedback-textarea"
           value={content}
           maxLength={max}
           disabled={pending}
-          aria-labelledby={`${id}-legend`}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `${countId} ${noticeId}` : countId}
           onChange={(e) => {
@@ -67,8 +68,10 @@ export default function FeedbackForm({
             setNotice(null);
           }}
         />
+        {/* Nhãn nổi: nằm trong ô như placeholder, khi focus hoặc đã có chữ thì thu nhỏ và trượt lên viền (CSS) */}
+        <label htmlFor={id} className="feedback-label">{t("label")}</label>
         <span id={countId} className="feedback-count">{t("counter", { count: [...content].length, max })}</span>
-      </fieldset>
+      </div>
       {/* Chỗ báo kết quả giữ sẵn một dòng cao (CSS) để hộp thoại không giật khi hiện / mất */}
       <p id={noticeId} className={`feedback-notice ${notice?.kind === "ok" ? "feedback-ok" : "form-error"}`} role={error ? "alert" : "status"}>{notice?.text}</p>
     </form>

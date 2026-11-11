@@ -1,19 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useRef, useState, useTransition } from "react";
-import { LOCALES, type Locale } from "@/i18n/config";
-import { setLocaleAction } from "@/lib/actions";
+import { useEffect, useId, useRef, useState } from "react";
 import FeedbackDialog, { FeedbackIcon } from "./FeedbackDialog";
 
-const LOCALE_LABEL: Record<Locale, string> = { vi: "Tiếng Việt", ja: "日本語" };
-
-/** Nút ba chấm dọc cạnh tên người dùng: sổ danh sách tùy chọn (Ý kiến & góp ý — hộp thoại có thêm tab "Xem góp ý" cho dev-admin; chọn ngôn ngữ) */
-export default function UserMenu({ max, isFeedbackAdmin, locale }: { max: number; isFeedbackAdmin: boolean; locale: Locale }) {
+/** Nút ba chấm dọc cạnh tên người dùng: sổ danh sách tùy chọn (Ý kiến & góp ý — hộp thoại có thêm tab "Xem góp ý" cho dev-admin) */
+export default function UserMenu({ max, isFeedbackAdmin }: { max: number; isFeedbackAdmin: boolean }) {
   const t = useTranslations("feedback");
   const tm = useTranslations("userMenu");
-  const tc = useTranslations("common");
-  const [pendingLocale, startLocale] = useTransition();
   const menuId = useId();
   const wrapRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -81,27 +75,6 @@ export default function UserMenu({ max, isFeedbackAdmin, locale }: { max: number
             <FeedbackIcon />
             {t("form.title")}
           </button>
-          <div className="menu-sep" role="separator" />
-          <div role="group" aria-label={tc("language")}>
-            <p className="menu-group-label" aria-hidden="true">{tc("language")}</p>
-            {LOCALES.map((l) => (
-              <button
-                key={l}
-                type="button"
-                role="menuitemradio"
-                aria-checked={l === locale}
-                className="menu-item menu-radio"
-                disabled={pendingLocale}
-                onClick={() => {
-                  setOpen(false);
-                  startLocale(() => setLocaleAction(l));
-                }}
-              >
-                <span className="menu-check" aria-hidden="true">{l === locale ? "✓" : ""}</span>
-                {LOCALE_LABEL[l]}
-              </button>
-            ))}
-          </div>
         </div>
       )}
       {dialogOpen && <FeedbackDialog max={max} isAdmin={isFeedbackAdmin} onClose={() => { setDialogOpen(false); buttonRef.current?.focus(); }} />}

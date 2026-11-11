@@ -3,7 +3,6 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { FeedbackStatus } from "@/db/schema";
-import { isLocale } from "@/i18n/config";
 import { listAllFeedbackAction, type AllFeedbackPage } from "@/lib/feedback-actions";
 import { fmtDateTime } from "@/lib/format";
 import FeedbackPager from "./FeedbackPager";
@@ -19,8 +18,7 @@ const FILTERS: readonly Filter[] = ["all", ...STATUSES];
 export default function AllFeedbackList() {
   const t = useTranslations("feedback.view");
   const tc = useTranslations("common");
-  const localeRaw = useLocale();
-  const locale = isLocale(localeRaw) ? localeRaw : "vi";
+  const locale = useLocale();
   const [filter, setFilter] = useState<Filter>("all");
   const [page, setPage] = useState(1);
   const [reload, setReload] = useState(0);
